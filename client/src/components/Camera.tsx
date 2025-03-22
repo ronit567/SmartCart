@@ -321,25 +321,101 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
           }
         }
       } else {
-        // Product not recognized with confidence
-        setScanResult({ success: false });
-        
-        // Show suggestion if available
+        // Product not recognized with confidence but add anyway if there's a suggestion
         if (result.suggestion) {
+          // Find the closest match in products based on the suggestion
+          let bestMatch = null;
+          let highestScore = 0;
+          
+          for (const product of products) {
+            // Simple matching logic - check if product name contains the suggested name or vice versa
+            const productNameLower = product.name.toLowerCase();
+            const suggestionLower = result.suggestion.toLowerCase();
+            
+            if (productNameLower.includes(suggestionLower) || 
+                suggestionLower.includes(productNameLower)) {
+              const score = Math.min(productNameLower.length, suggestionLower.length) / 
+                          Math.max(productNameLower.length, suggestionLower.length);
+              
+              if (score > highestScore) {
+                highestScore = score;
+                bestMatch = product;
+              }
+            }
+          }
+          
+          if (bestMatch) {
+            // Add the suggested product to the cart
+            addItemToCart(bestMatch.id);
+            
+            // Update scan result
+            setScanResult({ 
+              success: true,
+              productName: bestMatch.name
+            });
+            
+            // Keep track of last 3 scanned products
+            setLastScannedProducts(prev => {
+              const updated = [bestMatch.name, ...prev].slice(0, 3);
+              return updated;
+            });
+            
+            if (onScanSuccess) {
+              onScanSuccess(bestMatch.name);
+            }
+            
+            // Show toast that we added the suggested item
+            toast({
+              title: 'Added Suggested Item',
+              description: `Added ${bestMatch.name} to your cart based on our best guess.`,
+              variant: 'default',
+            });
+            
+            // Play success sound
+            try {
+              const successSound = new Audio('/success-chime.mp3');
+              successSound.volume = 0.2;
+              successSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+            } catch (error) {
+              console.log('Audio not supported, continuing without sound');
+            }
+          } else {
+            // Could not match any product
+            setScanResult({ success: false });
+            
+            toast({
+              title: 'Product Not Found',
+              description: `Could not find "${result.suggestion}" in our database.`,
+              variant: 'destructive',
+            });
+            
+            // Play error sound
+            try {
+              const errorSound = new Audio('/error-beep.mp3');
+              errorSound.volume = 0.2;
+              errorSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+            } catch (error) {
+              console.log('Audio not supported, continuing without sound');
+            }
+          }
+        } else {
+          // No suggestion available
+          setScanResult({ success: false });
+          
           toast({
             title: 'Product Not Recognized',
-            description: `Unable to identify with confidence. It might be ${result.suggestion}.`,
-            variant: 'default',
+            description: 'Unable to identify this item. Please try again.',
+            variant: 'destructive',
           });
-        }
-        
-        // Play error sound
-        try {
-          const errorSound = new Audio('/error-beep.mp3');
-          errorSound.volume = 0.2;
-          errorSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
-        } catch (error) {
-          console.log('Audio not supported, continuing without sound');
+          
+          // Play error sound
+          try {
+            const errorSound = new Audio('/error-beep.mp3');
+            errorSound.volume = 0.2;
+            errorSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+          } catch (error) {
+            console.log('Audio not supported, continuing without sound');
+          }
         }
       }
     } catch (error) {

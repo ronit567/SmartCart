@@ -74,15 +74,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log("AI identified product:", result.productName, "with confidence:", result.confidence, "isGroceryItem:", result.isGroceryItem);
         
-        // If confidence is too low, return not recognized
-        if (result.confidence < 0.6) {
-          return res.status(200).json({
-            recognized: false,
-            message: "Could not identify product with confidence",
-            suggestion: result.productName,
-            isGroceryItem: result.isGroceryItem,
-          });
-        }
+        // Even if confidence is low, we'll still provide the name for the client to decide
+        // But we'll indicate that we're not fully confident with recognized: false
+        const lowConfidence = result.confidence < 0.6;
+        
+        // We'll continue with the match process either way, but mark low confidence ones
+        // This allows the client to handle low confidence cases differently if it wants to
         
         // Find best match based on product name
         let bestMatch = null;
@@ -108,10 +105,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (bestMatch && highestScore > 0.3) { // Reduced threshold to be more lenient
           console.log("Matched product:", bestMatch.name, "with score:", highestScore);
           return res.status(200).json({
-            recognized: true,
+            recognized: !lowConfidence, // Set recognized to false for low confidence matches
             product: bestMatch,
             confidence: result.confidence * highestScore,
             isGroceryItem: result.isGroceryItem,
+            suggestion: result.productName, // Always provide the suggested name
           });
         }
         
