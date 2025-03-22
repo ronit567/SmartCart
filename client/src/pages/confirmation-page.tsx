@@ -3,42 +3,17 @@ import { useLocation } from "wouter";
 import { Check, CreditCard, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/cart-context";
-import { useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { apiRequest } from "@/lib/queryClient";
 
 export default function ConfirmationPage() {
   const [, navigate] = useLocation();
-  const { total, subtotal, tax, cartItems, clearCart } = useCart();
-  const { toast } = useToast();
+  const { total, clearCart } = useCart();
   
-  // Generate a random order number
+  // Generate a random order number for display purposes only
   const orderNumber = Math.floor(1000000 + Math.random() * 9000000);
-
-  // Create an order in the database
-  const createOrderMutation = useMutation({
-    mutationFn: async () => {
-      if (cartItems.length === 0) return;
-      
-      await apiRequest('POST', '/api/orders', {
-        total,
-        subtotal,
-        tax
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Failed to save order",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  });
   
-  // Create the order and clear the cart when the page loads
+  // Clear the cart when the page loads (order was already created in checkout)
   useEffect(() => {
-    createOrderMutation.mutate();
     clearCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

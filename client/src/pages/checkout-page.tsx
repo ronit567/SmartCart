@@ -6,10 +6,52 @@ import { useCart } from "@/contexts/cart-context";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ComplementaryItems } from "@/components/ComplementaryItems";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
   const { cartItems, subtotal, tax, total } = useCart();
+  const { toast } = useToast();
+  
+  // Create an order in the database
+  const createOrderMutation = useMutation({
+    mutationFn: async () => {
+      if (cartItems.length === 0) {
+        throw new Error("Your cart is empty");
+      }
+      
+      await apiRequest('POST', '/api/orders', {
+        total,
+        subtotal,
+        tax
+      });
+    },
+    onSuccess: () => {
+      navigate("/confirmation");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to place order",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  const handlePlaceOrder = () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "Empty Cart",
+        description: "Cannot place an order with an empty cart",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    createOrderMutation.mutate();
+  };
   
   return (
     <div className="h-full flex flex-col bg-white">
@@ -105,9 +147,10 @@ export default function CheckoutPage() {
       <div className="border-t border-gray-200 p-4 bg-white">
         <Button 
           className="w-full"
-          onClick={() => navigate("/confirmation")}
+          onClick={handlePlaceOrder}
+          disabled={createOrderMutation.isPending || cartItems.length === 0}
         >
-          Place Order
+          {createOrderMutation.isPending ? "Processing..." : "Place Order"}
         </Button>
         <p className="text-xs text-center text-gray-500 mt-3">
           By placing your order, you agree to our Terms of Service and Privacy Policy
