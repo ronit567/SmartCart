@@ -42,6 +42,13 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
           videoRef.current.srcObject = stream;
           streamRef.current = stream;
           setIsCameraActive(true);
+          
+          // Wait for video to be ready before capturing frames
+          videoRef.current.onloadedmetadata = () => {
+            if (videoRef.current) {
+              videoRef.current.play();
+            }
+          };
         }
       } else {
         toast({
@@ -84,8 +91,8 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
       
       if (context) {
         // Set canvas dimensions to match video
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
         
         // Draw current video frame on canvas
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -253,95 +260,99 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
   };
   
   return (
-    <div className="camera-view relative flex-grow bg-black h-full">
-      {!isCameraActive ? (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center p-4">
-            <CameraOff className="mx-auto h-12 w-12 mb-2" />
-            <p>Camera permission required</p>
-            <Button 
-              onClick={enableCamera} 
-              className="mt-3" 
-              variant="default"
-            >
-              Enable Camera
-            </Button>
+    <div className="flex flex-col h-full">
+      <div className="camera-view relative flex-grow bg-black overflow-hidden">
+        {!isCameraActive ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-white text-center p-4">
+              <CameraOff className="mx-auto h-12 w-12 mb-2" />
+              <p>Camera permission required</p>
+              <Button 
+                onClick={enableCamera} 
+                className="mt-3" 
+                variant="default"
+              >
+                Enable Camera
+              </Button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <>
-          {/* Hidden video element for capturing stream */}
-          <video
-            ref={videoRef}
-            className="hidden"
-            autoPlay
-            playsInline
-            muted
-          />
-          
-          {/* Canvas for displaying modified video */}
-          <canvas 
-            ref={canvasRef}
-            className="h-full w-full object-cover"
-          />
-          
-          {/* Scanning status overlay */}
-          {isScanning && (
-            <div className="scanning-effect absolute inset-0 bg-primary bg-opacity-10 animate-pulse">
-              <div className="h-1 bg-primary animate-scan-line"></div>
+        ) : (
+          <>
+            {/* Hidden video element for capturing stream */}
+            <video
+              ref={videoRef}
+              className="hidden"
+              autoPlay
+              playsInline
+              muted
+            />
+            
+            {/* Canvas for displaying modified video */}
+            <canvas 
+              ref={canvasRef}
+              className="h-full w-full object-cover"
+            />
+            
+            {/* Scanning status overlay */}
+            {isScanning && (
+              <div className="scanning-effect absolute inset-0 bg-primary bg-opacity-10 animate-pulse">
+                <div className="h-1 bg-primary animate-scan-line"></div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      
+      {/* Bottom panel with results */}
+      {isCameraActive && (
+        <div className="bg-black bg-opacity-70 backdrop-blur-sm p-3 rounded-t-xl z-10">
+          {/* Success indicator */}
+          {!isScanning && scanResult.success && (
+            <div className="flex items-center justify-between bg-success bg-opacity-20 p-2 rounded-lg mb-2">
+              <div className="flex items-center">
+                <ShoppingBasket className="text-white mr-2 h-5 w-5" />
+                <div>
+                  <div className="text-white text-sm font-medium">{scanResult.productName}</div>
+                  <div className="text-green-300 text-xs">Added to cart</div>
+                </div>
+              </div>
+              <div className="bg-white text-success rounded-full h-6 w-6 flex items-center justify-center">
+                <span className="text-xs font-bold">+1</span>
+              </div>
             </div>
           )}
           
-          {/* Bottom panel with results */}
-          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-40 backdrop-blur-sm p-3 rounded-t-xl">
-            {/* Success indicator */}
-            {!isScanning && scanResult.success && (
-              <div className="flex items-center justify-between bg-success bg-opacity-20 p-2 rounded-lg mb-2">
-                <div className="flex items-center">
-                  <ShoppingBasket className="text-white mr-2 h-5 w-5" />
-                  <div>
-                    <div className="text-white text-sm font-medium">{scanResult.productName}</div>
-                    <div className="text-green-300 text-xs">Added to cart</div>
-                  </div>
-                </div>
-                <div className="bg-white text-success rounded-full h-6 w-6 flex items-center justify-center">
-                  <span className="text-xs font-bold">+1</span>
-                </div>
-              </div>
-            )}
-            
-            {/* Error indicator */}
-            {!isScanning && !scanResult.success && scanResult.success !== undefined && (
-              <div className="text-white text-center text-sm mb-2">
-                <span className="text-red-400">No product detected.</span> Position item clearly within the frame.
-              </div>
-            )}
-            
-            {/* Instructions */}
-            <div className="text-white/70 text-xs text-center mb-3">
-              {isScanning ? 'Analyzing...' : 'Position product in center of frame and tap Scan'}
+          {/* Error indicator */}
+          {!isScanning && !scanResult.success && scanResult.success !== undefined && (
+            <div className="text-white text-center text-sm mb-2">
+              <span className="text-red-400">No product detected.</span> Position item clearly within the frame.
             </div>
-            
-            {/* Scan button */}
-            <Button
-              className="w-full bg-primary hover:bg-primary/90 text-white rounded-lg py-3"
-              onClick={scanProduct}
-              disabled={isScanning || isAddingItem}
-            >
-              {isScanning ? (
-                <span className="flex items-center">
-                  <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-                  Scanning...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center">
-                  <Camera className="mr-2 h-5 w-5" />
-                  Scan Product
-                </span>
-              )}
-            </Button>
+          )}
+          
+          {/* Instructions */}
+          <div className="text-white/70 text-xs text-center mb-3">
+            {isScanning ? 'Analyzing...' : 'Position product in center of frame and tap Scan'}
           </div>
-        </>
+          
+          {/* Scan button */}
+          <Button
+            className="w-full bg-primary hover:bg-primary/90 text-white rounded-lg py-3"
+            onClick={scanProduct}
+            disabled={isScanning || isAddingItem}
+          >
+            {isScanning ? (
+              <span className="flex items-center">
+                <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                Scanning...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center">
+                <Camera className="mr-2 h-5 w-5" />
+                Scan Product
+              </span>
+            )}
+          </Button>
+        </div>
       )}
     </div>
   );

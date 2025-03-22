@@ -12,6 +12,10 @@
   }
 }
 
+html, body, #root {
+  height: 100%;
+}
+
 /* Custom animations for scanner */
 @keyframes scan-line {
   0% {
@@ -24,6 +28,12 @@
 
 .animate-scan-line {
   animation: scan-line 1.2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.8);
+}
+
+/* Camera view setup */
+.camera-view {
+  height: calc(100% - 80px); /* Adjust based on your bottom panel height */
 }
 
 /* Camera scan effects */
@@ -51,4 +61,20 @@
   right: 0;
   border-bottom: 2px solid white;
   border-right: 2px solid white;
+}
+
+/* Scan button */
+.scan-button {
+  background: linear-gradient(to right, #10b981, #059669);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.scan-button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.scan-button:disabled {
+  opacity: 0.7;
 }
