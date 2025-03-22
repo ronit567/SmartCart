@@ -16,7 +16,6 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
   const [lastScannedProducts, setLastScannedProducts] = useState<string[]>([]);
   
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   
   const { toast } = useToast();
@@ -29,28 +28,42 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
   
   const enableCamera = async () => {
     try {
+      console.log("Enabling camera...");
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        console.log("getUserMedia supported - attempting to access camera");
+        
+        const constraints = {
           video: { 
             facingMode: "environment",
             width: { ideal: 1280 },
             height: { ideal: 720 }
           }
-        });
+        };
+        
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log("Camera stream obtained successfully");
         
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           streamRef.current = stream;
+          
+          // Force camera active status here since we got a stream
           setIsCameraActive(true);
           
           // Wait for video to be ready before capturing frames
           videoRef.current.onloadedmetadata = () => {
+            console.log("Video metadata loaded");
             if (videoRef.current) {
-              videoRef.current.play();
+              videoRef.current.play()
+                .then(() => console.log("Video playback started"))
+                .catch(err => console.error("Error playing video:", err));
             }
           };
+        } else {
+          console.error("Video reference is null");
         }
       } else {
+        console.error("getUserMedia not supported");
         toast({
           title: "Camera Error",
           description: "Your browser doesn't support camera access",
@@ -58,12 +71,12 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
         });
       }
     } catch (error) {
+      console.error("Error accessing camera:", error);
       toast({
         title: "Camera Error",
         description: "Could not access the camera. Please check permissions.",
         variant: "destructive",
       });
-      console.error("Error accessing camera:", error);
     }
   };
   
@@ -82,99 +95,34 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
     };
   }, []);
 
-  // Enhanced scanning effect - capture frame
-  const captureFrame = () => {
-    if (videoRef.current && canvasRef.current && streamRef.current) {
+  // This function would be used if we needed to process frames
+  // Currently we're directly displaying the video with overlays
+  const captureImageForProcessing = () => {
+    if (videoRef.current && streamRef.current) {
       const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
       
+      // Create a temporary canvas to capture the frame
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      
+      const context = canvas.getContext('2d');
       if (context) {
-        // Set canvas dimensions to match video
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 480;
-        
-        // Draw current video frame on canvas
+        // Draw the current video frame to the canvas
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        // Add visual processing effect
-        context.fillStyle = 'rgba(52, 211, 153, 0.2)'; // Light green overlay
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        // Get the image data for processing
+        // const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         
-        // Add scan line animation
-        const scanLineY = (Date.now() % 1000) / 1000 * canvas.height;
-        context.strokeStyle = 'rgba(52, 211, 153, 0.8)';
-        context.lineWidth = 2;
-        context.beginPath();
-        context.moveTo(0, scanLineY);
-        context.lineTo(canvas.width, scanLineY);
-        context.stroke();
+        // Here you would add code to process the image data
+        // (e.g., object detection, barcode scanning, etc.)
         
-        // Highlight the center target area
-        const centerWidth = canvas.width * 0.6;
-        const centerHeight = canvas.height * 0.4;
-        const centerX = (canvas.width - centerWidth) / 2;
-        const centerY = (canvas.height - centerHeight) / 2;
-        
-        context.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        context.lineWidth = 2;
-        context.strokeRect(centerX, centerY, centerWidth, centerHeight);
-        
-        // Add corner markers
-        const markerSize = 20;
-        context.strokeStyle = '#10b981'; // Emerald
-        context.lineWidth = 3;
-        
-        // Top-left corner
-        context.beginPath();
-        context.moveTo(centerX, centerY + markerSize);
-        context.lineTo(centerX, centerY);
-        context.lineTo(centerX + markerSize, centerY);
-        context.stroke();
-        
-        // Top-right corner
-        context.beginPath();
-        context.moveTo(centerX + centerWidth - markerSize, centerY);
-        context.lineTo(centerX + centerWidth, centerY);
-        context.lineTo(centerX + centerWidth, centerY + markerSize);
-        context.stroke();
-        
-        // Bottom-left corner
-        context.beginPath();
-        context.moveTo(centerX, centerY + centerHeight - markerSize);
-        context.lineTo(centerX, centerY + centerHeight);
-        context.lineTo(centerX + markerSize, centerY + centerHeight);
-        context.stroke();
-        
-        // Bottom-right corner
-        context.beginPath();
-        context.moveTo(centerX + centerWidth - markerSize, centerY + centerHeight);
-        context.lineTo(centerX + centerWidth, centerY + centerHeight);
-        context.lineTo(centerX + centerWidth, centerY + centerHeight - markerSize);
-        context.stroke();
+        // Return the data URL if needed
+        return canvas.toDataURL('image/jpeg');
       }
     }
+    return null;
   };
-  
-  // Run the frame capture animation when camera is active
-  useEffect(() => {
-    let animationId: number;
-    
-    if (isCameraActive) {
-      const animate = () => {
-        captureFrame();
-        animationId = requestAnimationFrame(animate);
-      };
-      
-      animationId = requestAnimationFrame(animate);
-    }
-    
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-    };
-  }, [isCameraActive]);
   
   // Simulate scanning a product with more realistic behavior
   const scanProduct = () => {
@@ -278,27 +226,35 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
           </div>
         ) : (
           <>
-            {/* Hidden video element for capturing stream */}
+            {/* Video element for direct display */}
             <video
               ref={videoRef}
-              className="hidden"
+              className="h-full w-full object-cover"
               autoPlay
               playsInline
               muted
             />
             
-            {/* Canvas for displaying modified video */}
-            <canvas 
-              ref={canvasRef}
-              className="h-full w-full object-cover"
-            />
-            
-            {/* Scanning status overlay */}
-            {isScanning && (
-              <div className="scanning-effect absolute inset-0 bg-primary bg-opacity-10 animate-pulse">
-                <div className="h-1 bg-primary animate-scan-line"></div>
+            {/* Overlay for scanning effects */}
+            <div className="absolute inset-0 pointer-events-none">
+              {/* Target frame */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-4/5 h-2/5 border-2 border-white/40 rounded-lg">
+                  {/* Corner markers */}
+                  <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-primary rounded-tl"></div>
+                  <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-primary rounded-tr"></div>
+                  <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-primary rounded-bl"></div>
+                  <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-primary rounded-br"></div>
+                </div>
               </div>
-            )}
+              
+              {/* Scanning animation */}
+              {isScanning && (
+                <div className="scanning-effect absolute inset-0 bg-primary bg-opacity-10 animate-pulse">
+                  <div className="h-1 bg-primary animate-scan-line"></div>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
