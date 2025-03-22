@@ -124,30 +124,43 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
     };
   }, []);
 
-  // This function would be used if we needed to process frames
-  // Currently we're directly displaying the video with overlays
+  // Capture and optimize the camera frame for processing
   const captureImageForProcessing = () => {
     if (videoRef.current && streamRef.current) {
       const video = videoRef.current;
       
       // Create a temporary canvas to capture the frame
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
+      
+      // Reduce the image size to optimize for API transfer
+      const maxWidth = 640;
+      const maxHeight = 480;
+      
+      // Calculate scaled dimensions while maintaining aspect ratio
+      let width = video.videoWidth || 640;
+      let height = video.videoHeight || 480;
+      
+      if (width > maxWidth) {
+          height = Math.round(height * (maxWidth / width));
+          width = maxWidth;
+      }
+      
+      if (height > maxHeight) {
+          width = Math.round(width * (maxHeight / height));
+          height = maxHeight;
+      }
+      
+      // Set canvas dimensions to the optimized size
+      canvas.width = width;
+      canvas.height = height;
       
       const context = canvas.getContext('2d');
       if (context) {
-        // Draw the current video frame to the canvas
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Draw the current video frame to the canvas at the reduced size
+        context.drawImage(video, 0, 0, width, height);
         
-        // Get the image data for processing
-        // const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        
-        // Here you would add code to process the image data
-        // (e.g., object detection, barcode scanning, etc.)
-        
-        // Return the data URL if needed
-        return canvas.toDataURL('image/jpeg');
+        // Return the data URL with reduced quality to minimize payload size
+        return canvas.toDataURL('image/jpeg', 0.7); // 0.7 quality (70%)
       }
     }
     return null;
