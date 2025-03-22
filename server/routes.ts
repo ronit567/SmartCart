@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
 import { insertCartItemSchema } from "@shared/schema";
+import { identifyProduct } from "./anthropic";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
