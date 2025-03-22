@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { ShoppingBag, ShoppingCart, Bot, Trash2 } from "lucide-react";
+import { ShoppingBag, ShoppingCart, Bot, Trash2, Camera, CameraOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CameraComponent } from "@/components/Camera";
 import { useCart } from "@/contexts/cart-context";
 import { CartItem } from "@/components/CartItem";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ScanPage() {
   const [, navigate] = useLocation();
   const { cartItems, totalItems, subtotal, total, tax } = useCart();
   const [lastScannedItem, setLastScannedItem] = useState<string | null>(null);
+  const [isCameraOn, setIsCameraOn] = useState(false);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const cameraRef = useRef<{ stopCamera?: () => void }>(null);
   
   const handleScanSuccess = (productName: string) => {
     setLastScannedItem(productName);
@@ -21,6 +25,28 @@ export default function ScanPage() {
   // Mobile layout has camera on top, cart on bottom
   // Desktop layout has camera on left, cart on right
   const isDesktop = !isMobile;
+
+  const toggleCamera = () => {
+    if (isCameraOn) {
+      // Reference to the camera component's stopCamera method
+      if (cameraRef.current?.stopCamera) {
+        cameraRef.current.stopCamera();
+      }
+      setIsCameraOn(false);
+      toast({
+        title: "Camera disabled",
+        description: "Camera has been turned off",
+        duration: 500, // 0.5 seconds
+      });
+    } else {
+      setIsCameraOn(true);
+      toast({
+        title: "Camera enabled",
+        description: "Camera is now active",
+        duration: 500, // 0.5 seconds
+      });
+    }
+  };
   
   return (
     <div className="h-full flex flex-col bg-indigo-100">
@@ -31,20 +57,41 @@ export default function ScanPage() {
           <h1 className="text-xl font-bold">SMARTCART</h1>
         </div>
         
-        {isMobile && (
+        <div className="flex items-center gap-2">
           <Button 
-            variant="ghost" 
-            className="text-indigo-900 relative"
-            onClick={() => navigate("/cart")}
+            variant="outline" 
+            size="sm"
+            className="text-indigo-900"
+            onClick={toggleCamera}
           >
-            <ShoppingCart className="h-5 w-5" />
-            {totalItems > 0 && (
-              <Badge variant="destructive" className="absolute -top-2 -right-2 min-w-5 h-5 flex items-center justify-center">
-                {totalItems}
-              </Badge>
+            {isCameraOn ? (
+              <>
+                <CameraOff className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Turn Off Camera</span>
+              </>
+            ) : (
+              <>
+                <Camera className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Turn On Camera</span>
+              </>
             )}
           </Button>
-        )}
+          
+          {isMobile && (
+            <Button 
+              variant="ghost" 
+              className="text-indigo-900 relative"
+              onClick={() => navigate("/cart")}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {totalItems > 0 && (
+                <Badge variant="destructive" className="absolute -top-2 -right-2 min-w-5 h-5 flex items-center justify-center">
+                  {totalItems}
+                </Badge>
+              )}
+            </Button>
+          )}
+        </div>
       </header>
       
       {/* Main Content - Responsive Layout */}
@@ -54,7 +101,28 @@ export default function ScanPage() {
           <div className="absolute top-3 left-3 bg-indigo-800 text-white px-3 py-1 rounded-lg z-10">
             <h2 className="text-base font-medium">Scanner</h2>
           </div>
-          <CameraComponent onScanSuccess={handleScanSuccess} />
+          {isCameraOn ? (
+            <CameraComponent 
+              onScanSuccess={handleScanSuccess} 
+              ref={cameraRef}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-white">
+              <Camera className="w-16 h-16 mb-4 opacity-30" />
+              <p className="text-lg font-medium mb-2">Camera is turned off</p>
+              <p className="text-sm text-center max-w-xs text-gray-300 mb-4">
+                Turn on the camera to scan your grocery items
+              </p>
+              <Button
+                variant="outline"
+                onClick={toggleCamera}
+                className="border-white text-white hover:bg-indigo-800"
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                Enable Camera
+              </Button>
+            </div>
+          )}
         </div>
         
         {/* Cart Section */}
