@@ -55,18 +55,39 @@ export default function HomePage() {
           <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">Mission</a>
           <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">Help</a>
           
-          <Button size="sm" variant="outline" className="bg-white hover:bg-white text-indigo-900 mr-2 hidden sm:inline-flex">
-            Log In
-          </Button>
+          {/* Desktop user menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="hidden sm:inline-flex">
+              <Button size="sm" variant="outline" className="bg-white text-indigo-900 border-indigo-300">
+                {user?.firstName || user?.username || 'Account'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>
+                {user?.firstName} {user?.lastName}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleProfileClick}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHistoryClick}>
+                Order History
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout} 
+                className="text-destructive focus:text-destructive"
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           
-          <Button size="sm" className="bg-indigo-900 hover:bg-indigo-800 text-white hidden sm:inline-flex">
-            SIGN UP
-          </Button>
-          
+          {/* Mobile user menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="sm:hidden">
               <Button size="sm" variant="outline" className="bg-white text-indigo-900 border-indigo-300">
-                {user?.firstName || 'Menu'}
+                {user?.firstName || user?.username || 'Menu'}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -110,10 +131,10 @@ export default function HomePage() {
           
           <Button 
             onClick={() => navigate("/scan")} 
-            className="bg-indigo-900 hover:bg-indigo-800 text-white w-40 h-12 text-lg rounded-md mb-20 mt-4"
+            className="bg-indigo-900 hover:bg-indigo-800 text-white w-48 h-12 text-lg rounded-md mb-20 mt-4"
           >
-            Download
-            <Download className="ml-2 h-5 w-5" />
+            Start Scanning
+            <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           
           <p className="text-gray-600 mt-auto">
