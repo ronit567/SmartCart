@@ -176,6 +176,15 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
     setIsScanning(true);
     setScanResult({ success: false });
     
+    // Play a scan sound effect
+    try {
+      const scanSound = new Audio('/scan-beep.mp3');
+      scanSound.volume = 0.3;
+      scanSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+    } catch (error) {
+      console.log('Audio not supported, continuing without sound');
+    }
+    
     // Simulate processing time with visual feedback
     setTimeout(() => {
       const successRate = 0.8; // 80% success rate
@@ -217,8 +226,26 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
         if (onScanSuccess) {
           onScanSuccess(selectedProduct.name);
         }
+        
+        // Play success sound
+        try {
+          const successSound = new Audio('/success-chime.mp3');
+          successSound.volume = 0.2;
+          successSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+        } catch (error) {
+          console.log('Audio not supported, continuing without sound');
+        }
       } else {
         setScanResult({ success: false });
+        
+        // Play error sound
+        try {
+          const errorSound = new Audio('/error-beep.mp3');
+          errorSound.volume = 0.2;
+          errorSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+        } catch (error) {
+          console.log('Audio not supported, continuing without sound');
+        }
       }
       
       setIsScanning(false);
