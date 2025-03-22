@@ -9,17 +9,18 @@ const anthropic = new Anthropic({
 export async function identifyProduct(base64Image: string): Promise<{
   productName: string;
   confidence: number;
+  isGroceryItem: boolean;
 }> {
   try {
     const response = await anthropic.messages.create({
       model: "claude-3-7-sonnet-20250219",
-      max_tokens: 150,
+      max_tokens: 200,
       messages: [{
         role: "user",
         content: [
           {
             type: "text",
-            text: "Identify this grocery item. Only respond with a single line in JSON format with keys 'productName' (specific name of the product) and 'confidence' (number between 0 and 1). If you're not sure what it is, return a lower confidence score. Focus on common grocery items like fruits, vegetables, dairy, bread, etc."
+            text: "Identify this grocery item. Only respond with a single line in JSON format with keys 'productName' (specific name of the product), 'confidence' (number between 0 and 1), and 'isGroceryItem' (boolean). The isGroceryItem should be true if this is something typically sold in grocery stores (including beverages like soda/Coca-Cola, snacks, packaged foods, etc) and false otherwise. If you're not sure what it is, return a lower confidence score. Focus on common grocery store items."
           },
           {
             type: "image",
@@ -51,7 +52,8 @@ export async function identifyProduct(base64Image: string): Promise<{
     
     return {
       productName: result.productName,
-      confidence: Math.max(0, Math.min(1, result.confidence))
+      confidence: Math.max(0, Math.min(1, result.confidence)),
+      isGroceryItem: result.isGroceryItem === true
     };
   } catch (error) {
     console.error("Failed to analyze image:", error);

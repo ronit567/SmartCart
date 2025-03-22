@@ -1,10 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Camera, CameraOff, ShoppingBasket, AlertCircle } from "lucide-react";
+import { Camera, CameraOff, ShoppingBasket, AlertCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/cart-context";
 import { apiRequest } from "@/lib/queryClient";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CameraComponentProps {
   onScanSuccess?: (productName: string) => void;
@@ -15,6 +25,8 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<{ success: boolean; productName?: string }>({ success: false });
   const [lastScannedProducts, setLastScannedProducts] = useState<string[]>([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [nonGroceryItem, setNonGroceryItem] = useState<{name: string, productId: number | null, suggestion: string} | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -183,6 +195,56 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
     }
   });
 
+  // Confirmation handler for non-grocery items
+  const handleAddNonGroceryItem = () => {
+    if (nonGroceryItem && nonGroceryItem.productId) {
+      // Add the item to cart
+      addItemToCart(nonGroceryItem.productId);
+      
+      // Update scan result
+      setScanResult({ 
+        success: true,
+        productName: nonGroceryItem.name
+      });
+      
+      // Keep track of last 3 scanned products
+      setLastScannedProducts(prev => {
+        const updated = [nonGroceryItem.name, ...prev].slice(0, 3);
+        return updated;
+      });
+      
+      if (onScanSuccess) {
+        onScanSuccess(nonGroceryItem.name);
+      }
+      
+      // Play success sound
+      try {
+        const successSound = new Audio('/success-chime.mp3');
+        successSound.volume = 0.2;
+        successSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+      } catch (error) {
+        console.log('Audio not supported, continuing without sound');
+      }
+    }
+    
+    // Close dialog and reset
+    setShowConfirmDialog(false);
+    setNonGroceryItem(null);
+  };
+
+  // Cancel handler for non-grocery items
+  const handleCancelNonGroceryItem = () => {
+    setShowConfirmDialog(false);
+    setNonGroceryItem(null);
+    
+    // Show feedback toast
+    toast({
+      title: 'Item Not Added',
+      description: 'The item was not added to your cart.',
+      variant: 'default',
+    });
+  };
+
   // Actual scan product function using AI recognition
   const scanProduct = async () => {
     if (!products || products.length === 0) return;
@@ -209,33 +271,54 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
       // Send the image to the API for analysis
       const result = await identifyMutation.mutateAsync(imageData);
       
+      // First check if it's recognized as a grocery item
       if (result.recognized && result.product) {
-        // Add the identified product to the cart
-        addItemToCart(result.product.id);
-        
-        // Update scan result and last scanned products
-        setScanResult({ 
-          success: true,
-          productName: result.product.name
-        });
-        
-        // Keep track of last 3 scanned products
-        setLastScannedProducts(prev => {
-          const updated = [result.product.name, ...prev].slice(0, 3);
-          return updated;
-        });
-        
-        if (onScanSuccess) {
-          onScanSuccess(result.product.name);
-        }
-        
-        // Play success sound
-        try {
-          const successSound = new Audio('/success-chime.mp3');
-          successSound.volume = 0.2;
-          successSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
-        } catch (error) {
-          console.log('Audio not supported, continuing without sound');
+        // Check if it's a grocery item
+        if (result.isGroceryItem) {
+          // Add the identified product to the cart
+          addItemToCart(result.product.id);
+          
+          // Update scan result and last scanned products
+          setScanResult({ 
+            success: true,
+            productName: result.product.name
+          });
+          
+          // Keep track of last 3 scanned products
+          setLastScannedProducts(prev => {
+            const updated = [result.product.name, ...prev].slice(0, 3);
+            return updated;
+          });
+          
+          if (onScanSuccess) {
+            onScanSuccess(result.product.name);
+          }
+          
+          // Play success sound
+          try {
+            const successSound = new Audio('/success-chime.mp3');
+            successSound.volume = 0.2;
+            successSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+          } catch (error) {
+            console.log('Audio not supported, continuing without sound');
+          }
+        } else {
+          // It's recognized but not a grocery item - ask for confirmation
+          setNonGroceryItem({
+            name: result.product.name,
+            productId: result.product.id,
+            suggestion: result.suggestion || "non-grocery item"
+          });
+          setShowConfirmDialog(true);
+          
+          // Play alert sound
+          try {
+            const alertSound = new Audio('/alert-tone.mp3');
+            alertSound.volume = 0.2;
+            alertSound.play().catch(err => console.log('Audio play failed, continuing without sound'));
+          } catch (error) {
+            console.log('Audio not supported, continuing without sound');
+          }
         }
       } else {
         // Product not recognized with confidence
@@ -273,6 +356,38 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
   
   return (
     <div className="flex flex-col h-full">
+      {/* Non-grocery item confirmation dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center">
+              <HelpCircle className="h-5 w-5 mr-2 text-amber-500" />
+              Non-grocery Item Detected
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {nonGroceryItem ? (
+                <>
+                  <p className="mb-2">
+                    This appears to be <span className="font-semibold">{nonGroceryItem.name}</span>, which doesn't look like a typical grocery item.
+                  </p>
+                  <p>Would you still like to add it to your cart?</p>
+                </>
+              ) : (
+                <p>This doesn't appear to be a typical grocery item. Would you still like to add it to your cart?</p>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelNonGroceryItem}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleAddNonGroceryItem}>
+              Add To Cart
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="camera-view relative flex-grow bg-black overflow-hidden">
         {!isCameraActive ? (
           <div className="absolute inset-0 flex items-center justify-center">
