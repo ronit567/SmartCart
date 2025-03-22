@@ -65,42 +65,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remove the data:image/jpeg;base64, prefix if present
       const base64Image = image.replace(/^data:image\/\w+;base64,/, "");
       
-      // Skip the AI step and use the fallback approach for now
-      // This will allow testing while the API credit issue is resolved
-      const products = await storage.getAllProducts();
-      
-      // For demo/testing purposes, simulate successful recognition
-      if (products.length > 0) {
-        // Return the product that is most likely to be a banana (if we have one)
-        // otherwise return a random product for testing
+      try {
+        // Use Anthropic's Claude to identify the product
+        const result = await identifyProduct(base64Image);
         
-        // Try to find a banana-like product first
-        let matchedProduct = products.find(p => 
-          p.name.toLowerCase().includes('banana') || 
-          p.name.toLowerCase().includes('fruit')
-        );
+        // Find the closest match in our product database
+        const products = await storage.getAllProducts();
         
-        // If no banana/fruit found, pick a random product
-        if (!matchedProduct) {
-          matchedProduct = products[Math.floor(Math.random() * products.length)];
+        console.log("AI identified product:", result.productName, "with confidence:", result.confidence);
+        
+        // If confidence is too low, return not recognized
+        if (result.confidence < 0.6) {
+          return res.status(200).json({
+            recognized: false,
+            message: "Could not identify product with confidence",
+            suggestion: result.productName,
+          });
         }
         
-        console.log("Using demo mode, returning product:", matchedProduct.name);
+        // Find best match based on product name
+        let bestMatch = null;
+        let highestScore = 0;
         
+        for (const product of products) {
+          // Simple matching logic - check if product name contains the identified name or vice versa
+          const productNameLower = product.name.toLowerCase();
+          const identifiedNameLower = result.productName.toLowerCase();
+          
+          if (productNameLower.includes(identifiedNameLower) || 
+              identifiedNameLower.includes(productNameLower)) {
+            const score = Math.min(productNameLower.length, identifiedNameLower.length) / 
+                         Math.max(productNameLower.length, identifiedNameLower.length);
+            
+            if (score > highestScore) {
+              highestScore = score;
+              bestMatch = product;
+            }
+          }
+        }
+        
+        if (bestMatch && highestScore > 0.3) { // Reduced threshold to be more lenient
+          console.log("Matched product:", bestMatch.name, "with score:", highestScore);
+          return res.status(200).json({
+            recognized: true,
+            product: bestMatch,
+            confidence: result.confidence * highestScore,
+          });
+        }
+        
+        // No good match found
         return res.status(200).json({
-          recognized: true,
-          product: matchedProduct,
-          confidence: 0.9,
-          note: "Demo mode active - API credits need to be refreshed"
+          recognized: false,
+          message: "Product not in database",
+          suggestion: result.productName,
         });
+      } catch (aiError) {
+        console.error("AI processing error:", aiError);
+        
+        // If AI processing fails, let the outer catch block handle it
+        throw aiError;
       }
-      
-      // Fallback for empty product database
-      return res.status(200).json({
-        recognized: false,
-        message: "No products in database",
-        suggestion: "Banana"
-      });
     } catch (error) {
       console.error("Error identifying product:", error);
       return res.status(500).json({ message: "Failed to identify product" });
