@@ -1,19 +1,44 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
-import { Check, CreditCard } from "lucide-react";
+import { Check, CreditCard, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/cart-context";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function ConfirmationPage() {
   const [, navigate] = useLocation();
-  const { total, clearCart } = useCart();
+  const { total, subtotal, tax, cartItems, clearCart } = useCart();
+  const { toast } = useToast();
   
   // Generate a random order number
   const orderNumber = Math.floor(1000000 + Math.random() * 9000000);
+
+  // Create an order in the database
+  const createOrderMutation = useMutation({
+    mutationFn: async () => {
+      if (cartItems.length === 0) return;
+      
+      await apiRequest('POST', '/api/orders', {
+        total,
+        subtotal,
+        tax
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to save order",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
   
-  // Clear the cart when an order is confirmed
+  // Create the order and clear the cart when the page loads
   useEffect(() => {
+    createOrderMutation.mutate();
     clearCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -42,18 +67,29 @@ export default function ConfirmationPage() {
           </div>
         </div>
         
-        <div className="w-full">
+        <div className="w-full space-y-3">
           <p className="font-medium mb-1">What's next?</p>
-          <p className="text-gray-600 text-sm mb-6">
+          <p className="text-gray-600 text-sm">
             Show your confirmation to a store associate on your way out.
           </p>
           
-          <Button 
-            className="w-full"
-            onClick={() => navigate("/")}
-          >
-            Back to Home
-          </Button>
+          <div className="flex flex-col space-y-2">
+            <Button 
+              className="w-full"
+              onClick={() => navigate("/")}
+            >
+              Back to Home
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate("/order-history")}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              View Order History
+            </Button>
+          </div>
         </div>
       </div>
     </div>

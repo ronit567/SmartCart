@@ -1,121 +1,196 @@
-import { useState } from "react";
-import { Check, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/cart-context";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Product } from "@shared/schema";
+import { useCart } from "@/contexts/cart-context";
+import { Loader2, Plus } from "lucide-react";
 
-// Predefined sets of complementary items based on specific products
-const complementaryPairings: Record<string, Product[]> = {
-  "Potato Chips": [
-    { id: 101, name: "Sour Cream Dip", price: 3.49, barcode: "123456789001", imageUrl: null },
-    { id: 102, name: "Salsa", price: 4.29, barcode: "123456789002", imageUrl: null }
-  ],
-  "Bread": [
-    { id: 103, name: "Strawberry Jam", price: 4.99, barcode: "123456789003", imageUrl: null },
-    { id: 104, name: "Peanut Butter", price: 5.79, barcode: "123456789004", imageUrl: null }
-  ],
-  "Pasta": [
-    { id: 105, name: "Pasta Sauce", price: 3.99, barcode: "123456789005", imageUrl: null },
-    { id: 106, name: "Parmesan Cheese", price: 5.49, barcode: "123456789006", imageUrl: null }
-  ],
-  "Ground Beef": [
-    { id: 107, name: "Taco Seasoning", price: 1.99, barcode: "123456789007", imageUrl: null },
-    { id: 108, name: "Hamburger Buns", price: 3.49, barcode: "123456789008", imageUrl: null }
-  ],
-  "Ice Cream": [
-    { id: 109, name: "Chocolate Syrup", price: 3.99, barcode: "123456789009", imageUrl: null },
-    { id: 110, name: "Sprinkles", price: 2.49, barcode: "123456789010", imageUrl: null }
-  ],
-  "Hot Dogs": [
-    { id: 111, name: "Hot Dog Buns", price: 3.29, barcode: "123456789011", imageUrl: null },
-    { id: 112, name: "Ketchup", price: 2.99, barcode: "123456789012", imageUrl: null }
-  ],
-  "Coffee": [
-    { id: 113, name: "Coffee Creamer", price: 2.99, barcode: "123456789013", imageUrl: null },
-    { id: 114, name: "Sugar", price: 3.49, barcode: "123456789014", imageUrl: null }
-  ],
-  "Cereal": [
-    { id: 115, name: "Milk", price: 3.99, barcode: "123456789015", imageUrl: null },
-    { id: 116, name: "Bananas", price: 1.99, barcode: "123456789016", imageUrl: null }
-  ]
-};
+interface ComplementaryProduct {
+  product: Product;
+  reason: string;
+}
 
+/**
+ * Finds complementary products based on cart items
+ * For example, if cart has chips, suggests salsa or dip
+ */
 export function ComplementaryItems() {
-  const { cartItems, addItemToCart } = useCart();
-  const [addedItems, setAddedItems] = useState<Record<number, boolean>>({});
-  
-  // Find complementary items for products in cart
-  const findComplementaryItems = () => {
-    const suggestedItems: Product[] = [];
-    const alreadyAdded = new Set<number>();
+  const { cartItems, addItemToCart, isAddingItem } = useCart();
+  const [complementaryProducts, setComplementaryProducts] = useState<ComplementaryProduct[]>([]);
+
+  // Fetch all products
+  const { data: products = [], isLoading } = useQuery<Product[]>({
+    queryKey: ['/api/products'],
+  });
+
+  useEffect(() => {
+    if (!products.length || !cartItems.length) {
+      setComplementaryProducts([]);
+      return;
+    }
+
+    // Define product complementary relationships
+    const complementaryPairs = [
+      // Chips and dips
+      { 
+        category: 'chips', 
+        keywords: ['chips', 'tortilla chips', 'corn chips', 'potato chips', 'nachos'],
+        complementary: 'dip', 
+        complementaryKeywords: ['salsa', 'guacamole', 'dip', 'hummus', 'queso'],
+        reason: 'Great with your chips!'
+      },
+      // Pasta and sauce
+      { 
+        category: 'pasta', 
+        keywords: ['pasta', 'spaghetti', 'penne', 'linguine', 'fettuccine', 'macaroni'],
+        complementary: 'pasta sauce', 
+        complementaryKeywords: ['pasta sauce', 'marinara', 'alfredo', 'tomato sauce', 'pesto'],
+        reason: 'Perfect sauce for your pasta!'
+      },
+      // Bread and spreads
+      { 
+        category: 'bread', 
+        keywords: ['bread', 'bagel', 'toast', 'baguette', 'roll', 'loaf'],
+        complementary: 'spread', 
+        complementaryKeywords: ['butter', 'jam', 'jelly', 'peanut butter', 'nutella', 'honey'],
+        reason: 'Delicious on your bread!'
+      },
+      // Crackers and cheese
+      { 
+        category: 'crackers', 
+        keywords: ['crackers', 'ritz', 'wheat thins', 'water crackers', 'rice crackers'],
+        complementary: 'cheese', 
+        complementaryKeywords: ['cheese', 'cheddar', 'brie', 'cream cheese', 'swiss', 'gouda'],
+        reason: 'Perfect cheese pairing!'
+      },
+      // Coffee and creamer/sweetener
+      { 
+        category: 'coffee', 
+        keywords: ['coffee', 'espresso', 'coffee beans', 'ground coffee'],
+        complementary: 'coffee additions', 
+        complementaryKeywords: ['creamer', 'milk', 'half and half', 'sugar', 'sweetener'],
+        reason: 'For your coffee!'
+      },
+      // Ice cream and toppings
+      { 
+        category: 'ice cream', 
+        keywords: ['ice cream', 'gelato', 'frozen yogurt', 'sorbet'],
+        complementary: 'ice cream toppings', 
+        complementaryKeywords: ['chocolate syrup', 'caramel sauce', 'sprinkles', 'whipped cream', 'fudge'],
+        reason: 'Top your ice cream!'
+      },
+      // Cereal and milk
+      { 
+        category: 'cereal', 
+        keywords: ['cereal', 'granola', 'oatmeal'],
+        complementary: 'milk', 
+        complementaryKeywords: ['milk', 'almond milk', 'soy milk', 'oat milk', 'coconut milk'],
+        reason: 'Don\'t forget the milk!'
+      },
+      // Cookies and milk
+      { 
+        category: 'cookies', 
+        keywords: ['cookies', 'oreos', 'chocolate chip', 'biscuits'],
+        complementary: 'milk', 
+        complementaryKeywords: ['milk', 'chocolate milk', 'almond milk'],
+        reason: 'Perfect with your cookies!'
+      },
+      // Burgers and condiments
+      { 
+        category: 'burger', 
+        keywords: ['burger', 'patties', 'ground beef', 'burger buns', 'hamburger'],
+        complementary: 'condiments', 
+        complementaryKeywords: ['ketchup', 'mustard', 'mayonnaise', 'relish', 'pickles'],
+        reason: 'For your burger!'
+      }
+    ];
     
-    // Mark items already in cart
-    cartItems.forEach(item => {
-      alreadyAdded.add(item.product.id);
-    });
+    const suggestions = new Map<number, ComplementaryProduct>();
+    const alreadyInCartIds = new Set(cartItems.map(item => item.product.id));
     
-    // Find complementary items
-    cartItems.forEach(cartItem => {
-      const productName = cartItem.product.name;
+    // Find what's in the cart and suggest complementary items
+    for (const cartItem of cartItems) {
+      const productName = cartItem.product.name.toLowerCase();
       
-      // Check if we have complementary items for this product
-      for (const [key, items] of Object.entries(complementaryPairings)) {
-        if (productName.includes(key)) {
-          // Add each complementary item if not already in cart
-          items.forEach(item => {
-            if (!alreadyAdded.has(item.id) && !suggestedItems.some(p => p.id === item.id)) {
-              suggestedItems.push(item);
-            }
+      for (const pair of complementaryPairs) {
+        // Check if cart item matches any keyword
+        const keywordMatch = pair.keywords.some(keyword => 
+          productName.includes(keyword.toLowerCase())
+        );
+        
+        if (keywordMatch) {
+          // Find complementary products that match this pair
+          const matchingProducts = products.filter(product => {
+            const name = product.name.toLowerCase();
+            return pair.complementaryKeywords.some(keyword => 
+              name.includes(keyword.toLowerCase())
+            ) && !alreadyInCartIds.has(product.id);
           });
+          
+          // Add up to 2 random matching products to suggestions
+          const selectedProducts = matchingProducts
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 2);
+            
+          for (const product of selectedProducts) {
+            if (!suggestions.has(product.id)) {
+              suggestions.set(product.id, {
+                product,
+                reason: pair.reason
+              });
+            }
+          }
         }
       }
-    });
+    }
     
-    // Limit to top 3 suggestions
-    return suggestedItems.slice(0, 3);
-  };
-  
-  const complementaryItems = findComplementaryItems();
-  
-  if (complementaryItems.length === 0) {
+    // Convert map to array and take just 3 suggestions
+    const finalSuggestions = Array.from(suggestions.values())
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+      
+    setComplementaryProducts(finalSuggestions);
+  }, [cartItems, products]);
+
+  // No suggestions if cart is empty or no matching products
+  if (cartItems.length === 0 || complementaryProducts.length === 0) {
     return null;
   }
-  
-  const handleAddItem = (item: Product) => {
-    addItemToCart(item.id);
-    setAddedItems(prev => ({...prev, [item.id]: true}));
+
+  const handleAddItem = (product: Product) => {
+    addItemToCart(product.id, 1);
   };
-  
+
   return (
-    <div className="mt-4">
-      <h3 className="text-sm font-medium text-gray-700 mb-2">Frequently Bought Together</h3>
-      <div className="space-y-2">
-        {complementaryItems.map(item => (
-          <div key={item.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
-            <div>
-              <p className="text-sm">{item.name}</p>
-              <p className="text-xs text-gray-500">${item.price.toFixed(2)}</p>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={addedItems[item.id] ? "bg-green-50 text-green-600 border-green-200" : ""}
-              onClick={() => handleAddItem(item)}
-              disabled={addedItems[item.id]}
-            >
-              {addedItems[item.id] ? (
-                <>
-                  <Check className="h-3 w-3 mr-1" />
-                  Added
-                </>
-              ) : (
-                <>
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add
-                </>
-              )}
-            </Button>
-          </div>
+    <div className="mb-8">
+      <h2 className="text-xl font-semibold mb-4">You Might Also Want...</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {complementaryProducts.map(({ product, reason }) => (
+          <Card key={product.id} className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">{product.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <p className="text-sm text-muted-foreground mb-2">{reason}</p>
+              <p className="font-medium">${product.price.toFixed(2)}</p>
+            </CardContent>
+            <CardFooter className="pt-0">
+              <Button 
+                onClick={() => handleAddItem(product)} 
+                className="w-full"
+                variant="outline"
+                disabled={isAddingItem}
+              >
+                {isAddingItem ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                Add to Cart
+              </Button>
+            </CardFooter>
+          </Card>
         ))}
       </div>
     </div>

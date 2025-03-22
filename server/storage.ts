@@ -391,6 +391,7 @@ export class MemStorage implements IStorage {
     
     return {
       id: order.id,
+      userId: order.userId,
       total: order.total,
       tax: order.tax,
       subtotal: order.subtotal,
@@ -437,6 +438,7 @@ export class MemStorage implements IStorage {
     
     return {
       id,
+      userId: order.userId,
       total: order.total,
       tax: order.tax,
       subtotal: order.subtotal,

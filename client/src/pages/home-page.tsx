@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ShoppingCart, ArrowRight, User as UserIcon, Download, Smartphone } from "lucide-react";
+import { ShoppingCart, ArrowRight, User as UserIcon, Download, Smartphone, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ManualEntryModal } from "@/components/ManualEntryModal";
 import { useAuth } from "@/hooks/use-auth";
