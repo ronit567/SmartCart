@@ -26,52 +26,80 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
     queryKey: ["/api/products"],
   });
   
+  // Function to access camera and set up video
+  const setupCamera = async () => {
+    try {
+      // Check if camera API is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Camera API not supported in this browser");
+      }
+      
+      // Request camera access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+      
+      // Store the stream reference
+      streamRef.current = stream;
+      
+      // Find video element and attach stream
+      const videoElement = document.getElementById('camera-video') as HTMLVideoElement;
+      if (!videoElement) {
+        throw new Error("Video element not found in DOM");
+      }
+      
+      videoElement.srcObject = stream;
+      
+      // Wait for video to be ready
+      return new Promise<void>((resolve) => {
+        videoElement.onloadedmetadata = () => {
+          videoElement.play()
+            .then(() => {
+              console.log("Camera is active and video is playing");
+              resolve();
+            })
+            .catch(err => {
+              console.error("Error playing video:", err);
+              throw err;
+            });
+        };
+      });
+    } catch (error) {
+      console.error("Camera setup error:", error);
+      throw error;
+    }
+  };
+  
+  // Camera enable function that the user triggers
   const enableCamera = async () => {
     try {
       console.log("Enabling camera...");
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        console.log("getUserMedia supported - attempting to access camera");
-        
-        const constraints = {
-          video: { 
-            facingMode: "environment",
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        };
-        
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log("Camera stream obtained successfully");
-        
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          streamRef.current = stream;
-          
-          // Force camera active status here since we got a stream
-          setIsCameraActive(true);
-          
-          // Wait for video to be ready before capturing frames
-          videoRef.current.onloadedmetadata = () => {
-            console.log("Video metadata loaded");
-            if (videoRef.current) {
-              videoRef.current.play()
-                .then(() => console.log("Video playback started"))
-                .catch(err => console.error("Error playing video:", err));
-            }
-          };
-        } else {
-          console.error("Video reference is null");
+      
+      // Set camera active state - this renders the video element
+      setIsCameraActive(true);
+      
+      // Wait a moment for the video element to be in the DOM
+      setTimeout(async () => {
+        try {
+          await setupCamera();
+          console.log("Camera setup complete!");
+        } catch (error) {
+          console.error("Error in camera setup:", error);
+          setIsCameraActive(false);
+          toast({
+            title: "Camera Error",
+            description: "Could not access the camera. Please check permissions.",
+            variant: "destructive",
+          });
         }
-      } else {
-        console.error("getUserMedia not supported");
-        toast({
-          title: "Camera Error",
-          description: "Your browser doesn't support camera access",
-          variant: "destructive",
-        });
-      }
+      }, 500);
     } catch (error) {
-      console.error("Error accessing camera:", error);
+      console.error("Fatal camera error:", error);
+      setIsCameraActive(false);
       toast({
         title: "Camera Error",
         description: "Could not access the camera. Please check permissions.",
@@ -226,8 +254,9 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
           </div>
         ) : (
           <>
-            {/* Video element for direct display */}
+            {/* Video element for direct display with both ID and ref */}
             <video
+              id="camera-video"
               ref={videoRef}
               className="h-full w-full object-cover"
               autoPlay
