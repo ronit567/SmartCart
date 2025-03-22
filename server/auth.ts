@@ -33,7 +33,7 @@ export function setupAuth(app: Express) {
     secret: process.env.SESSION_SECRET || "secret-scanGo-session-key",
     resave: false,
     saveUninitialized: false,
-    store: storage.sessionStore,
+    // Don't set a store, use the default MemoryStore
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     }
