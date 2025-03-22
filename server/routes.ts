@@ -72,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Find the closest match in our product database
         const products = await storage.getAllProducts();
         
-        console.log("AI identified product:", result.productName, "with confidence:", result.confidence);
+        console.log("AI identified product:", result.productName, "with confidence:", result.confidence, "isGroceryItem:", result.isGroceryItem);
         
         // If confidence is too low, return not recognized
         if (result.confidence < 0.6) {
@@ -80,6 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             recognized: false,
             message: "Could not identify product with confidence",
             suggestion: result.productName,
+            isGroceryItem: result.isGroceryItem,
           });
         }
         
@@ -110,6 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             recognized: true,
             product: bestMatch,
             confidence: result.confidence * highestScore,
+            isGroceryItem: result.isGroceryItem,
           });
         }
         
@@ -118,6 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           recognized: false,
           message: "Product not in database",
           suggestion: result.productName,
+          isGroceryItem: result.isGroceryItem,
         });
       } catch (aiError) {
         console.error("AI processing error:", aiError);
