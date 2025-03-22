@@ -34,10 +34,7 @@ export default function HomePage() {
   };
   
   const handleHistoryClick = () => {
-    toast({
-      title: "Order History",
-      description: "This feature is coming soon!",
-    });
+    navigate("/order-history");
   };
   
   return (
