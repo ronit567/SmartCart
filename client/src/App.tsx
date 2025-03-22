@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
+import ScanPage from "@/pages/scan-page";
 import CartPage from "@/pages/cart-page";
 import CheckoutPage from "@/pages/checkout-page";
 import ConfirmationPage from "@/pages/confirmation-page";
@@ -17,6 +18,7 @@ function Router() {
     <Switch>
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/" component={HomePage} />
+      <ProtectedRoute path="/scan" component={ScanPage} />
       <ProtectedRoute path="/cart" component={CartPage} />
       <ProtectedRoute path="/checkout" component={CheckoutPage} />
       <ProtectedRoute path="/confirmation" component={ConfirmationPage} />
