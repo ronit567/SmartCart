@@ -100,6 +100,7 @@ export type CartItemWithProduct = {
 
 export type OrderWithItems = {
   id: number;
+  userId: number;
   total: number;
   tax: number;
   subtotal: number;

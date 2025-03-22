@@ -351,6 +351,7 @@ export class MemStorage implements IStorage {
       
       result.push({
         id: order.id,
+        userId: order.userId,
         total: order.total,
         tax: order.tax,
         subtotal: order.subtotal,

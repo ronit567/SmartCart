@@ -9,6 +9,7 @@ import ScanPage from "@/pages/scan-page";
 import CartPage from "@/pages/cart-page";
 import CheckoutPage from "@/pages/checkout-page";
 import ConfirmationPage from "@/pages/confirmation-page";
+import OrderHistoryPage from "@/pages/order-history-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { CartProvider } from "@/contexts/cart-context";
@@ -22,6 +23,7 @@ function Router() {
       <ProtectedRoute path="/cart" component={CartPage} />
       <ProtectedRoute path="/checkout" component={CheckoutPage} />
       <ProtectedRoute path="/confirmation" component={ConfirmationPage} />
+      <ProtectedRoute path="/order-history" component={OrderHistoryPage} />
       <Route component={NotFound} />
     </Switch>
   );
