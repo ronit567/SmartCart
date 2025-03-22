@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/cart-context";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { ComplementaryItems } from "@/components/ComplementaryItems";
 
 export default function CheckoutPage() {
   const [, navigate] = useLocation();
@@ -94,6 +95,9 @@ export default function CheckoutPage() {
                 <span>${total.toFixed(2)}</span>
               </div>
             </div>
+            
+            {/* Complementary Items */}
+            <ComplementaryItems />
           </section>
         </div>
       </div>
