@@ -16,7 +16,7 @@ export default function ScanPage() {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const isMobile = useIsMobile();
   const { toast } = useToast();
-  const cameraRef = useRef<{ stopCamera?: () => void }>(null);
+  const cameraRef = useRef<CameraComponentRef>(null);
   
   const handleScanSuccess = (productName: string) => {
     setLastScannedItem(productName);
