@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { ShoppingBag, ShoppingCart, Bot, Trash2, Camera, CameraOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CameraComponent } from "@/components/Camera";
+import { CameraComponent, CameraComponentRef } from "@/components/Camera";
 import { useCart } from "@/contexts/cart-context";
 import { CartItem } from "@/components/CartItem";
 import { useIsMobile } from "@/hooks/use-mobile";
