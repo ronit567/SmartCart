@@ -8,6 +8,7 @@ import { useCart } from "@/contexts/cart-context";
 import { CartItem } from "@/components/CartItem";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
+import { SmartCartAI } from "@/components/SmartCartAI";
 
 export default function ScanPage() {
   const [, navigate] = useLocation();
@@ -172,13 +173,8 @@ export default function ScanPage() {
           
           {/* AI Assistant */}
           {isDesktop && (
-            <div className="p-4 border-t border-gray-200 flex items-start">
-              <div className="bg-gray-200 rounded-full p-2 mr-3">
-                <Bot className="h-5 w-5 text-gray-600" />
-              </div>
-              <div className="flex-1 bg-gray-100 rounded-lg p-3">
-                <p className="text-gray-700">Hi! How can I help you today?</p>
-              </div>
+            <div className="border-t border-gray-200 h-80">
+              <SmartCartAI />
             </div>
           )}
         </div>
