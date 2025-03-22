@@ -60,14 +60,71 @@ export class MemStorage implements IStorage {
 
   private initializeProducts(): void {
     const demoProducts: InsertProduct[] = [
+      // Produce
       { name: 'Organic Banana', price: 0.99, barcode: '12345', imageUrl: '' },
-      { name: 'Whole Milk', price: 3.49, barcode: '23456', imageUrl: '' },
-      { name: 'Whole Wheat Bread', price: 4.29, barcode: '34567', imageUrl: '' },
       { name: 'Organic Avocado', price: 1.99, barcode: '45678', imageUrl: '' },
-      { name: 'Free Range Eggs', price: 5.99, barcode: '56789', imageUrl: '' },
       { name: 'Green Bell Pepper', price: 0.79, barcode: '67890', imageUrl: '' },
+      { name: 'Red Apple', price: 1.29, barcode: '10001', imageUrl: '' },
+      { name: 'Broccoli', price: 2.99, barcode: '10002', imageUrl: '' },
+      { name: 'Spinach', price: 2.49, barcode: '10003', imageUrl: '' },
+      { name: 'Tomato', price: 0.69, barcode: '10004', imageUrl: '' },
+      { name: 'Cucumber', price: 0.99, barcode: '10005', imageUrl: '' },
+      
+      // Dairy
+      { name: 'Whole Milk', price: 3.49, barcode: '23456', imageUrl: '' },
       { name: 'Natural Yogurt', price: 3.29, barcode: '78901', imageUrl: '' },
-      { name: 'Chicken Breast', price: 8.99, barcode: '89012', imageUrl: '' }
+      { name: 'Free Range Eggs', price: 5.99, barcode: '56789', imageUrl: '' },
+      { name: 'Cheddar Cheese', price: 4.99, barcode: '10006', imageUrl: '' },
+      { name: 'Greek Yogurt', price: 3.99, barcode: '10007', imageUrl: '' },
+      { name: 'Butter', price: 3.49, barcode: '10008', imageUrl: '' },
+      { name: 'Sour Cream', price: 2.49, barcode: '10009', imageUrl: '' },
+      
+      // Bakery
+      { name: 'Whole Wheat Bread', price: 4.29, barcode: '34567', imageUrl: '' },
+      { name: 'White Bread', price: 3.99, barcode: '10010', imageUrl: '' },
+      { name: 'Bagels', price: 4.99, barcode: '10011', imageUrl: '' },
+      { name: 'Croissants', price: 5.99, barcode: '10012', imageUrl: '' },
+      { name: 'Muffins', price: 4.49, barcode: '10013', imageUrl: '' },
+      
+      // Meat & Seafood
+      { name: 'Chicken Breast', price: 8.99, barcode: '89012', imageUrl: '' },
+      { name: 'Ground Beef', price: 7.99, barcode: '10014', imageUrl: '' },
+      { name: 'Salmon Fillet', price: 12.99, barcode: '10015', imageUrl: '' },
+      { name: 'Pork Chops', price: 9.99, barcode: '10016', imageUrl: '' },
+      { name: 'Bacon', price: 6.99, barcode: '10017', imageUrl: '' },
+      
+      // Beverages
+      { name: 'Coca-Cola', price: 1.79, barcode: '10018', imageUrl: '' },
+      { name: 'Diet Coke', price: 1.79, barcode: '10019', imageUrl: '' },
+      { name: 'Pepsi', price: 1.79, barcode: '10020', imageUrl: '' },
+      { name: 'Orange Juice', price: 3.99, barcode: '10021', imageUrl: '' },
+      { name: 'Bottled Water', price: 0.99, barcode: '10022', imageUrl: '' },
+      { name: 'Coffee', price: 9.99, barcode: '10023', imageUrl: '' },
+      { name: 'Tea Bags', price: 4.99, barcode: '10024', imageUrl: '' },
+      
+      // Snacks
+      { name: 'Potato Chips', price: 3.49, barcode: '10025', imageUrl: '' },
+      { name: 'Tortilla Chips', price: 3.49, barcode: '10026', imageUrl: '' },
+      { name: 'Pretzels', price: 2.99, barcode: '10027', imageUrl: '' },
+      { name: 'Chocolate Cookies', price: 3.99, barcode: '10028', imageUrl: '' },
+      { name: 'Popcorn', price: 2.99, barcode: '10029', imageUrl: '' },
+      { name: 'Candy Bar', price: 1.29, barcode: '10030', imageUrl: '' },
+      { name: 'Granola Bars', price: 4.99, barcode: '10031', imageUrl: '' },
+      
+      // Canned & Packaged Foods
+      { name: 'Canned Tuna', price: 1.99, barcode: '10032', imageUrl: '' },
+      { name: 'Canned Soup', price: 2.49, barcode: '10033', imageUrl: '' },
+      { name: 'Pasta', price: 1.99, barcode: '10034', imageUrl: '' },
+      { name: 'Rice', price: 3.99, barcode: '10035', imageUrl: '' },
+      { name: 'Cereal', price: 4.99, barcode: '10036', imageUrl: '' },
+      { name: 'Peanut Butter', price: 3.99, barcode: '10037', imageUrl: '' },
+      { name: 'Nutella', price: 4.99, barcode: '10038', imageUrl: '' },
+      
+      // Frozen Foods
+      { name: 'Ice Cream', price: 5.99, barcode: '10039', imageUrl: '' },
+      { name: 'Frozen Pizza', price: 6.99, barcode: '10040', imageUrl: '' },
+      { name: 'Frozen Vegetables', price: 3.99, barcode: '10041', imageUrl: '' },
+      { name: 'Frozen Waffles', price: 4.99, barcode: '10042', imageUrl: '' }
     ];
     
     demoProducts.forEach(product => {
