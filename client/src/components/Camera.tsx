@@ -303,40 +303,53 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
         )}
       </div>
       
-      {/* Bottom panel with results */}
-      {isCameraActive && (
-        <div className="bg-black bg-opacity-70 backdrop-blur-sm p-3 rounded-t-xl z-10">
-          {/* Success indicator */}
-          {!isScanning && scanResult.success && (
-            <div className="flex items-center justify-between bg-success bg-opacity-20 p-2 rounded-lg mb-2">
-              <div className="flex items-center">
-                <ShoppingBasket className="text-white mr-2 h-5 w-5" />
-                <div>
-                  <div className="text-white text-sm font-medium">{scanResult.productName}</div>
-                  <div className="text-green-300 text-xs">Added to cart</div>
-                </div>
-              </div>
-              <div className="bg-white text-success rounded-full h-6 w-6 flex items-center justify-center">
-                <span className="text-xs font-bold">+1</span>
+      {/* Bottom panel with results - Always visible */}
+      <div className="bg-black bg-opacity-70 backdrop-blur-sm p-3 rounded-t-xl z-10">
+        {/* Success indicator */}
+        {isCameraActive && !isScanning && scanResult.success && (
+          <div className="flex items-center justify-between bg-success bg-opacity-20 p-2 rounded-lg mb-2">
+            <div className="flex items-center">
+              <ShoppingBasket className="text-white mr-2 h-5 w-5" />
+              <div>
+                <div className="text-white text-sm font-medium">{scanResult.productName}</div>
+                <div className="text-green-300 text-xs">Added to cart</div>
               </div>
             </div>
-          )}
-          
-          {/* Error indicator */}
-          {!isScanning && !scanResult.success && scanResult.success !== undefined && (
-            <div className="text-white text-center text-sm mb-2">
-              <span className="text-red-400">No product detected.</span> Position item clearly within the frame.
+            <div className="bg-white text-success rounded-full h-6 w-6 flex items-center justify-center">
+              <span className="text-xs font-bold">+1</span>
             </div>
-          )}
-          
-          {/* Instructions */}
+          </div>
+        )}
+        
+        {/* Error indicator */}
+        {isCameraActive && !isScanning && !scanResult.success && scanResult.success !== undefined && (
+          <div className="text-white text-center text-sm mb-2">
+            <span className="text-red-400">No product detected.</span> Position item clearly within the frame.
+          </div>
+        )}
+        
+        {/* Instructions */}
+        {isCameraActive && (
           <div className="text-white/70 text-xs text-center mb-3">
             {isScanning ? 'Analyzing...' : 'Position product in center of frame and tap Scan'}
           </div>
-          
-          {/* Scan button */}
+        )}
+        
+        {/* Enable Camera Button (when camera is not active) */}
+        {!isCameraActive ? (
           <Button
-            className="w-full bg-primary hover:bg-primary/90 text-white rounded-lg py-3"
+            className="w-full scan-button text-white rounded-lg py-3"
+            onClick={enableCamera}
+          >
+            <span className="flex items-center justify-center">
+              <Camera className="mr-2 h-5 w-5" />
+              Enable Camera
+            </span>
+          </Button>
+        ) : (
+          /* Scan button (when camera is active) */
+          <Button
+            className="w-full scan-button text-white rounded-lg py-3"
             onClick={scanProduct}
             disabled={isScanning || isAddingItem}
           >
@@ -352,8 +365,8 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
               </span>
             )}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

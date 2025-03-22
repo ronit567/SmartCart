@@ -36,7 +36,7 @@ export default function HomePage() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <header className="bg-white p-4 flex justify-between items-center shadow-sm">
+      <header className="bg-white p-3 flex justify-between items-center shadow-sm">
         <div className="flex items-center">
           <ShoppingCart className="text-primary mr-2 h-5 w-5" />
           <h1 className="text-xl font-semibold">ScanGo</h1>
@@ -72,11 +72,13 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Camera View */}
-      <CameraComponent />
+      {/* Main Content - Camera View */}
+      <div className="flex-grow flex overflow-hidden">
+        <CameraComponent />
+      </div>
       
       {/* Bottom Bar */}
-      <div className="bg-white p-4 shadow-lg border-t border-gray-200">
+      <div className="bg-white p-3 shadow-lg border-t border-gray-200">
         <div className="flex justify-between items-center">
           <div>
             <p className="text-sm text-gray-600">Cart Total</p>
