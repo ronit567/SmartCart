@@ -33,7 +33,20 @@ export async function identifyProduct(base64Image: string): Promise<{
       }]
     });
 
-    const resultText = response.content[0].text;
+    // Get the text content from the response safely
+    let resultText = '';
+    
+    for (const block of response.content) {
+      if ('text' in block) {
+        resultText = block.text;
+        break;
+      }
+    }
+    
+    if (!resultText) {
+      throw new Error("No text response from Claude");
+    }
+    
     const result = JSON.parse(resultText);
     
     return {

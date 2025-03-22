@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ShoppingCart, ArrowRight, User as UserIcon, Plus } from "lucide-react";
+import { ShoppingCart, ArrowRight, User as UserIcon, Download, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ManualEntryModal } from "@/components/ManualEntryModal";
 import { useAuth } from "@/hooks/use-auth";
@@ -42,22 +42,31 @@ export default function HomePage() {
   
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <header className="bg-indigo-200 p-3 flex justify-between items-center shadow-sm">
+      {/* Header - Exactly as shown in screenshot */}
+      <header className="bg-indigo-200 py-2 px-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center">
-          <ShoppingCart className="text-indigo-700 mr-2 h-5 w-5" />
-          <h1 className="text-xl font-semibold text-indigo-900">SMARTCART</h1>
+          <ShoppingCart className="text-indigo-900 mr-2 h-5 w-5" />
+          <h1 className="text-xl font-bold text-indigo-900">SMARTCART</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center space-x-6">
           <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">Home</a>
+          <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">AI</a>
           <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">About Us</a>
           <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">Mission</a>
           <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">Help</a>
           
+          <Button size="sm" variant="outline" className="bg-white hover:bg-white text-indigo-900 mr-2 hidden sm:inline-flex">
+            Log In
+          </Button>
+          
+          <Button size="sm" className="bg-indigo-900 hover:bg-indigo-800 text-white hidden sm:inline-flex">
+            SIGN UP
+          </Button>
+          
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="sm:hidden">
               <Button size="sm" variant="outline" className="bg-white text-indigo-900 border-indigo-300">
-                {user?.firstName || 'Account'}
+                {user?.firstName || 'Menu'}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -83,61 +92,88 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <div className="flex-grow flex flex-col md:flex-row items-stretch">
+      {/* Hero Section - Matched to screenshot */}
+      <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
         {/* Left Content */}
-        <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gray-900">
+        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+          <h1 className="text-5xl md:text-7xl font-bold mb-2 text-gray-900">
             SmartCart
           </h1>
-          <h2 className="text-xl md:text-2xl font-medium mb-6 text-gray-700">
+          <h2 className="text-xl md:text-2xl font-medium mb-4 text-gray-800">
             Shop Smarter, Checkout Faster!
           </h2>
-          <p className="text-gray-600 mb-8 max-w-md">
-            SmartCart revolutionizes grocery shopping with AI-powered detection, streamlined checkout, and seamless payment solutions — making every shopping trip efficient and hassle-free.
+          <p className="text-gray-700 mb-8 max-w-md">
+            SmartCart revolutionizes grocery shopping with AI-powered, 
+            accessible, and seamless checkout solutions — making every 
+            trip faster, easier, and smarter for all.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              onClick={() => navigate("/scan")} 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              size="lg"
-            >
-              Start Scanning
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button 
-              onClick={() => navigate("/cart")} 
-              variant="outline" 
-              size="lg"
-              className="border-indigo-300"
-              disabled={cartItems.length === 0}
-            >
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              View Cart {totalItems > 0 && `(${totalItems})`}
-            </Button>
-          </div>
-          <p className="text-sm text-gray-500 mt-6">
-            Add conveyer belt of fruits and vegetables for best experience.
+          
+          <Button 
+            onClick={() => navigate("/scan")} 
+            className="bg-indigo-900 hover:bg-indigo-800 text-white w-40 h-12 text-lg rounded-md mb-20 mt-4"
+          >
+            Download
+            <Download className="ml-2 h-5 w-5" />
+          </Button>
+          
+          <p className="text-gray-600 mt-auto">
+            Add conveyor belt of fruits and vegetables
           </p>
         </div>
         
-        {/* Right Image */}
-        <div className="w-full md:w-1/2 bg-indigo-100 relative overflow-hidden flex items-center justify-center p-8">
-          <div className="absolute inset-0 bg-indigo-600 opacity-10 rounded-bl-[100px]"></div>
-          <div className="relative max-w-sm mx-auto">
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-8 border-white" style={{ maxWidth: '280px' }}>
-              <div className="bg-indigo-200 p-2 text-center text-xs text-indigo-800 font-medium">
-                SCANNER
+        {/* Right Image - Phone Mockup */}
+        <div className="w-full md:w-1/2 bg-gradient-to-br from-indigo-400 to-indigo-800 relative overflow-hidden flex items-center justify-center">
+          {/* Background blobs/orbs */}
+          <div className="absolute bottom-20 right-20 w-32 h-32 rounded-full bg-indigo-300 opacity-40 blur-xl"></div>
+          <div className="absolute top-40 left-20 w-24 h-24 rounded-full bg-indigo-500 opacity-30 blur-xl"></div>
+          
+          {/* Wavy pattern (simplified) */}
+          <div className="absolute inset-0 opacity-10">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <path d="M0,50 Q25,30 50,50 T100,50 T150,50" stroke="white" strokeWidth="2" fill="none" className="animate-pulse" />
+              <path d="M0,60 Q25,40 50,60 T100,60 T150,60" stroke="white" strokeWidth="1.5" fill="none" className="animate-pulse" />
+              <path d="M0,70 Q25,50 50,70 T100,70 T150,70" stroke="white" strokeWidth="1" fill="none" className="animate-pulse" />
+            </svg>
+          </div>
+          
+          {/* Phone mockup */}
+          <div className="relative z-10 mt-8 mb-8">
+            <div className="bg-black rounded-[40px] shadow-2xl overflow-hidden border-[14px] border-black" style={{ maxWidth: '280px' }}>
+              {/* Phone notch */}
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-10"></div>
+              {/* Phone screen */}
+              <div className="bg-indigo-100 pt-8 pb-4 relative z-0">
+                {/* App UI */}
+                <div className="flex justify-between items-center px-4 pb-3">
+                  <Smartphone className="text-indigo-500 h-4 w-4" />
+                  <div className="text-xs text-right text-indigo-500">Settings</div>
+                </div>
+                
+                {/* Cart button */}
+                <div className="mx-auto my-2 px-6 py-2 rounded-full bg-indigo-300 w-[80%] text-center text-sm font-medium text-indigo-800 flex items-center justify-center space-x-2">
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>View Cart</span>
+                </div>
+                
+                {/* Detected item */}
+                <div className="mx-4 my-3 p-2 bg-white rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <div className="text-xs font-medium">Banana Bundle - Large</div>
+                    <div className="text-green-500 text-xs bg-green-50 rounded-full w-5 h-5 flex items-center justify-center">✓</div>
+                  </div>
+                  <div className="mt-1">
+                    <img 
+                      src="/bananas.jpg" 
+                      alt="Bananas" 
+                      className="w-full h-32 object-cover rounded-md"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://placehold.co/300x200/yellow/white?text=Bananas";
+                      }}
+                    />
+                  </div>
+                  <div className="text-xs text-center text-gray-500 mt-1">scanning...</div>
+                </div>
               </div>
-              <img 
-                src="https://i.imgur.com/XUyCfPl.jpg" 
-                alt="Bananas in scanner" 
-                className="w-full aspect-[3/4] object-cover"
-                onError={(e) => {
-                  // Fallback for image loading error
-                  e.currentTarget.src = "https://placehold.co/300x400/indigo/white?text=Product+Scanner";
-                }}
-              />
             </div>
           </div>
         </div>

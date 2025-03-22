@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Camera, CameraOff, ShoppingBasket } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Camera, CameraOff, ShoppingBasket, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/cart-context";
+import { apiRequest } from "@/lib/queryClient";
 
 interface CameraComponentProps {
   onScanSuccess?: (productName: string) => void;
@@ -152,8 +153,25 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
     return null;
   };
   
-  // Simulate scanning a product with more realistic behavior
-  const scanProduct = () => {
+  // Define the product identification mutation
+  const identifyMutation = useMutation({
+    mutationFn: async (imageData: string) => {
+      const response = await apiRequest('POST', '/api/identify-product', { image: imageData });
+      return response.json();
+    },
+    onError: (error) => {
+      console.error('Product identification failed:', error);
+      toast({
+        title: 'Identification Error',
+        description: 'Could not analyze the image. Please try again.',
+        variant: 'destructive',
+      });
+      setIsScanning(false);
+    }
+  });
+
+  // Actual scan product function using AI recognition
+  const scanProduct = async () => {
     if (!products || products.length === 0) return;
     
     setIsScanning(true);
@@ -168,46 +186,34 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
       console.log('Audio not supported, continuing without sound');
     }
     
-    // Simulate processing time with visual feedback
-    setTimeout(() => {
-      const successRate = 0.8; // 80% success rate
-      const isSuccess = Math.random() < successRate;
+    try {
+      // Capture the current video frame as an image
+      const imageData = captureImageForProcessing();
+      if (!imageData) {
+        throw new Error('Failed to capture image from camera');
+      }
       
-      if (isSuccess && products.length > 0) {
-        // Intelligent product selection - avoid repeating the last few scanned products
-        let availableProducts = [...products];
-        if (lastScannedProducts.length > 0) {
-          availableProducts = products.filter((product: any) => 
-            !lastScannedProducts.includes(product.name)
-          );
-        }
-        
-        // If no products left after filtering, use all products
-        if (availableProducts.length === 0) {
-          availableProducts = [...products];
-        }
-        
-        // Select a product
-        const randomIndex = Math.floor(Math.random() * availableProducts.length);
-        const selectedProduct = availableProducts[randomIndex];
-        
-        // Add to cart
-        addItemToCart(selectedProduct.id);
+      // Send the image to the API for analysis
+      const result = await identifyMutation.mutateAsync(imageData);
+      
+      if (result.recognized && result.product) {
+        // Add the identified product to the cart
+        addItemToCart(result.product.id);
         
         // Update scan result and last scanned products
         setScanResult({ 
           success: true,
-          productName: selectedProduct.name
+          productName: result.product.name
         });
         
         // Keep track of last 3 scanned products
         setLastScannedProducts(prev => {
-          const updated = [selectedProduct.name, ...prev].slice(0, 3);
+          const updated = [result.product.name, ...prev].slice(0, 3);
           return updated;
         });
         
         if (onScanSuccess) {
-          onScanSuccess(selectedProduct.name);
+          onScanSuccess(result.product.name);
         }
         
         // Play success sound
@@ -219,7 +225,17 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
           console.log('Audio not supported, continuing without sound');
         }
       } else {
+        // Product not recognized with confidence
         setScanResult({ success: false });
+        
+        // Show suggestion if available
+        if (result.suggestion) {
+          toast({
+            title: 'Product Not Recognized',
+            description: `Unable to identify with confidence. It might be ${result.suggestion}.`,
+            variant: 'default',
+          });
+        }
         
         // Play error sound
         try {
@@ -230,9 +246,16 @@ export function CameraComponent({ onScanSuccess }: CameraComponentProps) {
           console.log('Audio not supported, continuing without sound');
         }
       }
-      
+    } catch (error) {
+      console.error('Error during scan:', error);
+      toast({
+        title: 'Scan Failed',
+        description: 'Could not complete the scan. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
       setIsScanning(false);
-    }, 1500);
+    }
   };
   
   return (

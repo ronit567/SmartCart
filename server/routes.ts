@@ -53,6 +53,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Product recognition endpoint for AI camera scanning
+  app.post("/api/identify-product", async (req, res) => {
+    try {
+      const { image } = req.body;
+      
+      if (!image || typeof image !== 'string') {
+        return res.status(400).json({ message: "Image data is required" });
+      }
+      
+      // Remove the data:image/jpeg;base64, prefix if present
+      const base64Image = image.replace(/^data:image\/\w+;base64,/, "");
+      
+      // Use Anthropic's Claude to identify the product
+      const result = await identifyProduct(base64Image);
+      
+      // Find the closest match in our product database
+      const products = await storage.getAllProducts();
+      
+      // If confidence is too low, return not recognized
+      if (result.confidence < 0.6) {
+        return res.status(200).json({
+          recognized: false,
+          message: "Could not identify product with confidence",
+          suggestion: result.productName,
+        });
+      }
+      
+      // Find best match based on product name
+      let bestMatch = null;
+      let highestScore = 0;
+      
+      for (const product of products) {
+        // Simple matching logic - check if product name contains the identified name or vice versa
+        const productNameLower = product.name.toLowerCase();
+        const identifiedNameLower = result.productName.toLowerCase();
+        
+        if (productNameLower.includes(identifiedNameLower) || 
+            identifiedNameLower.includes(productNameLower)) {
+          const score = Math.min(productNameLower.length, identifiedNameLower.length) / 
+                       Math.max(productNameLower.length, identifiedNameLower.length);
+          
+          if (score > highestScore) {
+            highestScore = score;
+            bestMatch = product;
+          }
+        }
+      }
+      
+      if (bestMatch && highestScore > 0.4) {
+        return res.status(200).json({
+          recognized: true,
+          product: bestMatch,
+          confidence: result.confidence * highestScore,
+        });
+      }
+      
+      // No good match found
+      return res.status(200).json({
+        recognized: false,
+        message: "Product not in database",
+        suggestion: result.productName,
+      });
+    } catch (error) {
+      console.error("Error identifying product:", error);
+      return res.status(500).json({ message: "Failed to identify product" });
+    }
+  });
+
   // Cart routes
   app.get("/api/cart", async (req, res) => {
     if (!req.isAuthenticated()) {
