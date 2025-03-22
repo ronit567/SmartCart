@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-import { insertCartItemSchema } from "@shared/schema";
+import { insertCartItemSchema, insertOrderSchema } from "@shared/schema";
 import { identifyProduct } from "./anthropic";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -266,6 +266,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Order routes
+  app.get("/api/orders", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const orders = await storage.getOrders(req.user!.id);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/orders/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid order ID" });
+      }
+      
+      const order = await storage.getOrder(id);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      // Verify that the order belongs to the authenticated user
+      if (order.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Not authorized to view this order" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  app.post("/api/orders", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      // Validate order data
+      const validationResult = insertOrderSchema.safeParse({
+        ...req.body,
+        userId: req.user!.id,
+      });
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ message: "Invalid order data" });
+      }
+      
+      // Get cart items
+      const cartItems = await storage.getCartItems(req.user!.id);
+      if (cartItems.length === 0) {
+        return res.status(400).json({ message: "Cart is empty" });
+      }
+      
+      // Create order
+      const order = await storage.createOrder(validationResult.data, cartItems);
+      
+      // Clear cart after successful order creation
+      await storage.clearCart(req.user!.id);
+      
+      res.status(201).json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  app.delete("/api/orders/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid order ID" });
+      }
+      
+      const order = await storage.getOrder(id);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      await storage.deleteOrder(id);
+      
+      res.status(200).json({ message: "Order deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete order" });
+    }
+  });
+
+  app.delete("/api/orders", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      await storage.clearOrderHistory(req.user!.id);
+      res.status(200).json({ message: "Order history cleared successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear order history" });
+    }
+  });
+  
   // Create server instance
   const httpServer = createServer(app);
   return httpServer;

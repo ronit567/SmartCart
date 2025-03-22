@@ -1,7 +1,9 @@
 import { 
   users, type User, type InsertUser,
   products, type Product, type InsertProduct,
-  cartItems, type CartItem, type InsertCartItem, type CartItemWithProduct
+  cartItems, type CartItem, type InsertCartItem, type CartItemWithProduct,
+  orders, type Order, type InsertOrder, type OrderWithItems,
+  orderItems, type OrderItem, type InsertOrderItem
 } from "@shared/schema";
 import session from "express-session";
 
@@ -24,24 +26,40 @@ export interface IStorage {
   updateCartItemQuantity(id: number, quantity: number): Promise<CartItem | undefined>;
   deleteCartItem(id: number): Promise<boolean>;
   clearCart(userId: number): Promise<boolean>;
+  
+  // Order operations
+  getOrders(userId: number): Promise<OrderWithItems[]>;
+  getOrder(id: number): Promise<OrderWithItems | undefined>;
+  createOrder(order: InsertOrder, items: CartItemWithProduct[]): Promise<OrderWithItems>;
+  deleteOrder(id: number): Promise<boolean>;
+  clearOrderHistory(userId: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private products: Map<number, Product>;
   private cartItems: Map<number, CartItem>;
+  private orders: Map<number, Order>;
+  private orderItems: Map<number, OrderItem>;
   
   private currentUserId: number;
   private currentProductId: number;
   private currentCartItemId: number;
+  private currentOrderId: number;
+  private currentOrderItemId: number;
 
   constructor() {
     this.users = new Map();
     this.products = new Map();
     this.cartItems = new Map();
+    this.orders = new Map();
+    this.orderItems = new Map();
+    
     this.currentUserId = 1;
     this.currentProductId = 1;
     this.currentCartItemId = 1;
+    this.currentOrderId = 1;
+    this.currentOrderItemId = 1;
     
     // Initialize with demo products
     this.initializeProducts();
@@ -295,6 +313,158 @@ export class MemStorage implements IStorage {
     
     for (const item of items) {
       this.cartItems.delete(item.id);
+    }
+    
+    return true;
+  }
+  
+  // Order operations
+  async getOrders(userId: number): Promise<OrderWithItems[]> {
+    const userOrders = Array.from(this.orders.values())
+      .filter(order => order.userId === userId)
+      .sort((a, b) => {
+        // Sort by createdAt descending (newest first)
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+    
+    const result: OrderWithItems[] = [];
+    
+    for (const order of userOrders) {
+      // Find all items for this order
+      const items = Array.from(this.orderItems.values())
+        .filter(item => item.orderId === order.id);
+        
+      const itemsWithProducts = [];
+      
+      // Get product details for each order item
+      for (const item of items) {
+        const product = await this.getProduct(item.productId);
+        if (product) {
+          itemsWithProducts.push({
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price,
+            product
+          });
+        }
+      }
+      
+      result.push({
+        id: order.id,
+        total: order.total,
+        tax: order.tax,
+        subtotal: order.subtotal,
+        createdAt: order.createdAt,
+        items: itemsWithProducts
+      });
+    }
+    
+    return result;
+  }
+  
+  async getOrder(id: number): Promise<OrderWithItems | undefined> {
+    const order = this.orders.get(id);
+    
+    if (!order) {
+      return undefined;
+    }
+    
+    // Find all items for this order
+    const items = Array.from(this.orderItems.values())
+      .filter(item => item.orderId === order.id);
+      
+    const itemsWithProducts = [];
+    
+    // Get product details for each order item
+    for (const item of items) {
+      const product = await this.getProduct(item.productId);
+      if (product) {
+        itemsWithProducts.push({
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+          product
+        });
+      }
+    }
+    
+    return {
+      id: order.id,
+      total: order.total,
+      tax: order.tax,
+      subtotal: order.subtotal,
+      createdAt: order.createdAt,
+      items: itemsWithProducts
+    };
+  }
+  
+  async createOrder(insertOrder: InsertOrder, items: CartItemWithProduct[]): Promise<OrderWithItems> {
+    const id = this.currentOrderId++;
+    
+    // Create the order
+    const order: Order = {
+      ...insertOrder,
+      id,
+      createdAt: new Date()
+    };
+    
+    this.orders.set(id, order);
+    
+    // Create order items
+    const orderItemsWithProducts = [];
+    
+    for (const item of items) {
+      const orderItemId = this.currentOrderItemId++;
+      
+      const orderItem: OrderItem = {
+        id: orderItemId,
+        orderId: id,
+        productId: item.product.id,
+        quantity: item.quantity,
+        price: item.product.price
+      };
+      
+      this.orderItems.set(orderItemId, orderItem);
+      
+      orderItemsWithProducts.push({
+        id: orderItemId,
+        quantity: item.quantity,
+        price: item.product.price,
+        product: item.product
+      });
+    }
+    
+    return {
+      id,
+      total: order.total,
+      tax: order.tax,
+      subtotal: order.subtotal,
+      createdAt: order.createdAt,
+      items: orderItemsWithProducts
+    };
+  }
+  
+  async deleteOrder(id: number): Promise<boolean> {
+    // First delete all order items
+    const items = Array.from(this.orderItems.values())
+      .filter(item => item.orderId === id);
+      
+    for (const item of items) {
+      this.orderItems.delete(item.id);
+    }
+    
+    // Then delete the order
+    return this.orders.delete(id);
+  }
+  
+  async clearOrderHistory(userId: number): Promise<boolean> {
+    // Get all orders for this user
+    const userOrders = Array.from(this.orders.values())
+      .filter(order => order.userId === userId);
+      
+    // Delete each order and its items
+    for (const order of userOrders) {
+      await this.deleteOrder(order.id);
     }
     
     return true;
