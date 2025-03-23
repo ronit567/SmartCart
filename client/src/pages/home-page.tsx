@@ -3,16 +3,11 @@ import { useLocation } from "wouter";
 import {
   ShoppingCart,
   ArrowRight,
-  User,
+  User as UserIcon,
   Download,
   Smartphone,
   History,
   Mic,
-  Home,
-  Clock,
-  LogOut,
-  Menu,
-  Scan,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ManualEntryModal } from "@/components/ManualEntryModal";
@@ -55,156 +50,116 @@ export default function HomePage() {
   return (
     <div className="h-full flex flex-col">
       <Header>
-        <div className="flex items-center justify-between w-full">
-          {/* Main navigation - optimized for mobile */}
-          <div className="hidden sm:flex items-center space-x-6">
-            <a
-              href="#"
-              className="text-indigo-900 text-sm font-medium hover:text-indigo-700 transition-colors"
-            >
-              Home
-            </a>
-            <a
-              href="#"
-              className="text-indigo-900 text-sm font-medium hover:text-indigo-700 transition-colors"
-            >
-              AI
-            </a>
-            <a
-              href="#"
-              className="text-indigo-900 text-sm font-medium hover:text-indigo-700 transition-colors"
-            >
-              About Us
-            </a>
-            <a
-              href="#"
-              className="text-indigo-900 text-sm font-medium hover:text-indigo-700 transition-colors"
-            >
-              Mission
-            </a>
-            <a
-              href="#"
-              className="text-indigo-900 text-sm font-medium hover:text-indigo-700 transition-colors"
-            >
-              Help
-            </a>
-          </div>
-          
-          {/* Mobile brand label */}
-          <div className="sm:hidden flex items-center">
-            <span className="font-semibold text-indigo-900 text-lg">SmartCart</span>
-          </div>
+        <div className="flex items-center space-x-6">
+          <a
+            href="#"
+            className="text-indigo-900 text-sm font-medium hidden sm:inline"
+          >
+            Home
+          </a>
+          <a
+            href="#"
+            className="text-indigo-900 text-sm font-medium hidden sm:inline"
+          >
+            AI
+          </a>
+          <a
+            href="#"
+            className="text-indigo-900 text-sm font-medium hidden sm:inline"
+          >
+            About Us
+          </a>
+          <a
+            href="#"
+            className="text-indigo-900 text-sm font-medium hidden sm:inline"
+          >
+            Mission
+          </a>
+          <a
+            href="#"
+            className="text-indigo-900 text-sm font-medium hidden sm:inline"
+          >
+            Help
+          </a>
 
-          {/* User menu wrapper - positioning for both mobile and desktop */}
-          <div className="flex items-center space-x-2">
-            {/* Cart icon with indicator */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative mr-1"
-              onClick={() => navigate("/cart")}
-            >
-              <ShoppingCart className="h-5 w-5 text-indigo-900" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-indigo-700 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-            </Button>
-          
-            {/* Desktop user menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild className="hidden sm:inline-flex">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="bg-white text-indigo-900 border-indigo-300 hover:bg-indigo-50"
-                >
-                  {user?.firstName || user?.username || "Account"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel className="font-medium">
-                  {user?.firstName} {user?.lastName}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleHistoryClick} className="cursor-pointer">
-                  <Clock className="mr-2 h-4 w-4" />
-                  Order History
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-destructive focus:text-destructive cursor-pointer"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Desktop user menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="hidden sm:inline-flex">
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white text-indigo-900 border-indigo-300"
+              >
+                {user?.firstName || user?.username || "Account"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>
+                {user?.firstName} {user?.lastName}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleProfileClick}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHistoryClick}>
+                Order History
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive focus:text-destructive"
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-            {/* Mobile user menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild className="sm:hidden">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="bg-white text-indigo-900 border-indigo-300 h-9 w-9 p-0"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel className="font-medium">
-                  {user?.firstName} {user?.lastName}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer">
-                  <Home className="mr-2 h-4 w-4" />
-                  Home
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/scan")} className="cursor-pointer">
-                  <Scan className="mr-2 h-4 w-4" />
-                  Scan Items
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleHistoryClick} className="cursor-pointer">
-                  <Clock className="mr-2 h-4 w-4" />
-                  Order History
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-destructive focus:text-destructive cursor-pointer"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {/* Mobile user menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="sm:hidden">
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white text-indigo-900 border-indigo-300"
+              >
+                {user?.firstName || user?.username || "Menu"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>
+                {user?.firstName} {user?.lastName}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleProfileClick}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHistoryClick}>
+                Order History
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive focus:text-destructive"
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </Header>
 
-      {/* Hero Section - Mobile optimized */}
+      {/* Hero Section - Matched to screenshot */}
       <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
         {/* Left Content */}
-        <div className="w-full md:w-1/2 px-4 sm:px-6 py-4 sm:py-6 md:p-12 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 px-6 py-6 md:p-12 flex flex-col justify-center">
           <div className="text-center md:text-left">
-            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-1 sm:mb-2 text-gray-900 bg-gradient-to-r from-indigo-600 to-indigo-900 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-2 text-gray-900 bg-gradient-to-r from-indigo-600 to-indigo-900 bg-clip-text text-transparent">
               SmartCart
             </h1>
-            <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-medium mb-2 sm:mb-3 md:mb-4 text-gray-800">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-medium mb-3 md:mb-4 text-gray-800">
               Shop Smarter, Checkout Faster!
             </h2>
-            <p className="text-gray-700 mb-4 sm:mb-6 md:mb-8 max-w-md mx-auto md:mx-0 text-xs xs:text-sm sm:text-base">
+            <p className="text-gray-700 mb-6 md:mb-8 max-w-md mx-auto md:mx-0 text-sm sm:text-base">
               SmartCart revolutionizes grocery shopping with AI-powered, 
               accessible, and seamless checkout solutions — making every 
               trip faster, easier, and smarter for all.
@@ -214,27 +169,27 @@ export default function HomePage() {
           <div className="flex flex-col items-center md:items-start space-y-3">
             <Button 
               onClick={() => navigate("/scan")} 
-              className="bg-indigo-900 hover:bg-indigo-800 text-white w-[90%] xs:w-full sm:w-56 h-10 sm:h-12 text-sm sm:text-lg rounded-md mt-2 sm:mt-4 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105 font-medium"
+              className="bg-indigo-900 hover:bg-indigo-800 text-white w-full sm:w-56 h-12 text-lg rounded-md mt-4 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
               Start Scanning
-              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             
-            <div className="w-[90%] xs:w-full sm:w-56 mt-2">
+            <div className="w-full sm:w-56">
               <ChildrenGames />
             </div>
           </div>
           
-          <p className="text-gray-600 mt-auto text-center md:text-left text-xs pt-4 sm:pt-8 hidden md:block">
+          <p className="text-gray-600 mt-auto text-center md:text-left text-xs pt-8 hidden md:block">
             Add conveyor belt of fruits and vegetables
           </p>
         </div>
 
         {/* Right Image - Phone Mockup */}
-        <div className="w-full h-[55vh] md:h-auto md:w-1/2 bg-gradient-to-br from-indigo-400 to-indigo-800 relative overflow-hidden flex items-center justify-center">
+        <div className="w-full h-[70vh] md:h-auto md:w-1/2 bg-gradient-to-br from-indigo-400 to-indigo-800 relative overflow-hidden flex items-center justify-center">
           {/* Background blobs/orbs - Responsive positioning */}
-          <div className="absolute bottom-[10%] right-[10%] w-20 sm:w-32 h-20 sm:h-32 rounded-full bg-indigo-300 opacity-40 blur-xl"></div>
-          <div className="absolute top-[20%] left-[10%] w-14 sm:w-24 h-14 sm:h-24 rounded-full bg-indigo-500 opacity-30 blur-xl"></div>
+          <div className="absolute bottom-[10%] right-[10%] w-24 sm:w-32 h-24 sm:h-32 rounded-full bg-indigo-300 opacity-40 blur-xl"></div>
+          <div className="absolute top-[20%] left-[10%] w-16 sm:w-24 h-16 sm:h-24 rounded-full bg-indigo-500 opacity-30 blur-xl"></div>
 
           {/* Wavy pattern (simplified) - Responsive animation */}
           <div className="absolute inset-0 opacity-10">
@@ -263,8 +218,8 @@ export default function HomePage() {
             </svg>
           </div>
 
-          {/* Phone mockup - Smaller on mobile */}
-          <div className="relative z-10 my-6 transform scale-[0.6] xs:scale-65 sm:scale-75 md:scale-90">
+          {/* Phone mockup - Responsive sizing */}
+          <div className="relative z-10 my-8 transform scale-75 sm:scale-90 md:scale-100">
             <div
               className="bg-black rounded-[40px] shadow-2xl overflow-hidden border-[14px] border-black transition-all duration-500 hover:scale-105"
               style={{ maxWidth: "280px" }}
@@ -304,7 +259,7 @@ export default function HomePage() {
                     <img
                       src="bananas.jpg"
                       alt="Bananas"
-                      className="w-full h-28 object-cover rounded-md"
+                      className="w-full h-32 object-cover rounded-md"
                       onError={(e) => {
                         e.currentTarget.src =
                           "https://placehold.co/300x200/yellow/white?text=Bananas";
