@@ -46,7 +46,7 @@ export default function HomePage() {
     toast({
       title: "Profile",
       description: `Logged in as ${user?.username}`,
-      duration: 1500,
+      duration: 1000,
     });
   };
 
@@ -64,7 +64,7 @@ export default function HomePage() {
     toast({
       title: "SmartCart AI Assistant",
       description: "How can I help you today?",
-      duration: 2000,
+      duration: 1000,
     });
   };
 
@@ -73,7 +73,7 @@ export default function HomePage() {
     toast({
       title: "Camera Activated",
       description: "Scan your items by pointing the camera at them",
-      duration: 1500,
+      duration: 1000,
     });
   };
 

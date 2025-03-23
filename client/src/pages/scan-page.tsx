@@ -37,14 +37,14 @@ export default function ScanPage() {
       toast({
         title: "Camera disabled",
         description: "Camera has been turned off",
-        duration: 500, // 0.5 seconds
+        duration: 1000, // 1 second
       });
     } else {
       setIsCameraOn(true);
       toast({
         title: "Camera enabled",
         description: "Camera is now active",
-        duration: 500, // 0.5 seconds
+        duration: 1000, // 1 second
       });
     }
   };
