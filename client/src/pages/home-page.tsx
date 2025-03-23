@@ -57,6 +57,16 @@ export default function HomePage() {
   const handleHistoryClick = () => {
     navigate("/order-history");
   };
+  
+  const handleHelpClick = () => {
+    // Navigate to the AI chatbot
+    navigate("/ai-assistant");
+    toast({
+      title: "SmartCart AI Assistant",
+      description: "How can I help you today?",
+      duration: 2000,
+    });
+  };
 
   const handleStartScanning = () => {
     navigate("/scan");
@@ -97,7 +107,8 @@ export default function HomePage() {
           </a>
           <a
             href="#"
-            className="text-indigo-900 text-sm font-medium hidden sm:inline"
+            onClick={handleHelpClick}
+            className="text-indigo-900 text-sm font-medium hidden sm:inline cursor-pointer"
           >
             Help
           </a>
@@ -123,6 +134,9 @@ export default function HomePage() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleHistoryClick}>
                 Order History
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHelpClick}>
+                <span className="text-indigo-600 font-medium">Help</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -155,6 +169,9 @@ export default function HomePage() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleHistoryClick}>
                 Order History
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleHelpClick}>
+                <span className="text-indigo-600 font-medium">Help</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
