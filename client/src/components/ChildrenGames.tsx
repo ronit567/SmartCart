@@ -37,14 +37,14 @@ export function ChildrenGames() {
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs defaultValue="grocery-hunt" className="w-full">
+        <Tabs defaultValue="color-sort" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="grocery-hunt">Grocery Hunt</TabsTrigger>
+            <TabsTrigger value="color-sort">Color Sort</TabsTrigger>
             <TabsTrigger value="memory-match">Memory Match</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="grocery-hunt" className="mt-4">
-            <GroceryHuntGame />
+          <TabsContent value="color-sort" className="mt-4">
+            <ColorSortGame />
           </TabsContent>
           
           <TabsContent value="memory-match" className="mt-4">
@@ -62,26 +62,109 @@ export function ChildrenGames() {
   );
 }
 
-function GroceryHuntGame() {
+function ColorSortGame() {
   const [score, setScore] = useState(0);
-  const [itemsFound, setItemsFound] = useState<string[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
+  const [draggedItem, setDraggedItem] = useState<null | { id: string, emoji: string, color: string }>(null);
+  const [items, setItems] = useState<Array<{ id: string, emoji: string, color: string, sorted: boolean }>>([]);
+  const [level, setLevel] = useState(1);
+  const [gameComplete, setGameComplete] = useState(false);
   
-  const groceryItems = [
-    "Apple", "Banana", "Carrot", "Milk", "Bread", "Eggs"
+  // Define color categories with corresponding food items
+  const colorCategories = [
+    { name: "Red", color: "bg-red-500", items: ["🍎", "🍓", "🍒", "🍅", "🌶️"] },
+    { name: "Yellow", color: "bg-yellow-400", items: ["🍌", "🍋", "🍍", "🌽", "🧀"] },
+    { name: "Green", color: "bg-green-500", items: ["🥝", "🥑", "🥬", "🥦", "🫑"] },
+    { name: "Orange", color: "bg-orange-500", items: ["🍊", "🥕", "🎃", "🍑", "🧡"] }
   ];
   
+  // Initialize game based on level
   const startGame = () => {
+    const numberOfCategories = Math.min(level + 1, colorCategories.length);
+    const itemsPerCategory = level + 1;
+    
+    let gameItems: Array<{ id: string, emoji: string, color: string, sorted: boolean }> = [];
+    
+    // Select categories based on level
+    const selectedCategories = colorCategories.slice(0, numberOfCategories);
+    
+    // Add items from each category
+    selectedCategories.forEach(category => {
+      // Take a random subset of items from this category
+      const categoryItems = [...category.items]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, itemsPerCategory);
+      
+      // Add them to the game items
+      categoryItems.forEach((emoji, index) => {
+        gameItems.push({
+          id: `${category.name}-${index}`,
+          emoji,
+          color: category.name.toLowerCase(),
+          sorted: false
+        });
+      });
+    });
+    
+    // Shuffle all items
+    gameItems = gameItems.sort(() => Math.random() - 0.5);
+    
+    setItems(gameItems);
     setScore(0);
-    setItemsFound([]);
     setGameStarted(true);
+    setGameComplete(false);
   };
   
-  const findItem = (item: string) => {
-    if (!itemsFound.includes(item)) {
-      setItemsFound([...itemsFound, item]);
-      setScore(score + 10);
+  // Handle drag start
+  const handleDragStart = (item: { id: string, emoji: string, color: string }) => {
+    setDraggedItem(item);
+  };
+  
+  // Handle dropping item in a category
+  const handleDrop = (categoryName: string) => {
+    if (!draggedItem) return;
+    
+    const itemColor = draggedItem.color;
+    const isCorrect = itemColor.toLowerCase() === categoryName.toLowerCase();
+    
+    // Update items array
+    const updatedItems = items.map(item => {
+      if (item.id === draggedItem.id) {
+        return {
+          ...item,
+          sorted: true
+        };
+      }
+      return item;
+    });
+    
+    // Update score
+    if (isCorrect) {
+      setScore(prevScore => prevScore + 10);
+    } else {
+      setScore(prevScore => Math.max(0, prevScore - 5));
     }
+    
+    setItems(updatedItems);
+    setDraggedItem(null);
+    
+    // Check if all items are sorted
+    if (updatedItems.every(item => item.sorted)) {
+      // Level complete
+      if (level < 3) {
+        setTimeout(() => {
+          setLevel(level + 1);
+          startGame();
+        }, 1500);
+      } else {
+        setGameComplete(true);
+      }
+    }
+  };
+  
+  // Drag over handler (prevent default to allow drop)
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
   };
   
   if (!gameStarted) {
@@ -89,8 +172,8 @@ function GroceryHuntGame() {
       <div className="flex flex-col items-center">
         <div className="bg-indigo-100 rounded-lg p-4 mb-4 text-center">
           <h3 className="font-medium mb-2">How to Play:</h3>
-          <p className="text-sm mb-2">Find items on your shopping list to earn points!</p>
-          <p className="text-xs text-gray-600">Tap each item when you see it in the store.</p>
+          <p className="text-sm mb-2">Sort food items into their matching color categories!</p>
+          <p className="text-xs text-gray-600">Drag each food to its matching colored basket.</p>
         </div>
         <Button onClick={startGame} className="bg-indigo-600 hover:bg-indigo-700">
           Start Game
@@ -99,37 +182,55 @@ function GroceryHuntGame() {
     );
   }
   
+  // Get active categories for this level
+  const activeCategories = colorCategories.slice(0, Math.min(level + 1, colorCategories.length));
+  
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <div className="font-medium">Your Score: {score}</div>
-        <Button size="sm" variant="outline" onClick={() => setGameStarted(false)}>
+        <div className="font-medium">Level: {level}</div>
+        <div className="font-medium">Score: {score}</div>
+        <Button size="sm" variant="outline" onClick={startGame}>
           Restart
         </Button>
       </div>
       
-      <div className="bg-indigo-50 p-3 rounded-lg mb-4">
-        <h3 className="font-medium mb-2 text-center">Find These Items:</h3>
-        <div className="grid grid-cols-2 gap-2">
-          {groceryItems.map(item => (
-            <Button
-              key={item}
-              variant={itemsFound.includes(item) ? "default" : "outline"}
-              className={itemsFound.includes(item) 
-                ? "bg-green-100 text-green-800 border-green-300" 
-                : "bg-white"}
-              onClick={() => findItem(item)}
+      {/* Color baskets (drop targets) */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        {activeCategories.map(category => (
+          <div
+            key={category.name}
+            className={`${category.color} text-white p-2 rounded-lg text-center h-20 flex flex-col items-center justify-center`}
+            onDragOver={handleDragOver}
+            onDrop={() => handleDrop(category.name)}
+          >
+            <span className="font-medium">{category.name}</span>
+            <span className="text-xs">Drop here</span>
+          </div>
+        ))}
+      </div>
+      
+      {/* Food items to drag */}
+      <div className="bg-indigo-50 p-3 rounded-lg">
+        <h3 className="font-medium mb-2 text-center">Drag these items to their colors:</h3>
+        <div className="grid grid-cols-4 gap-2">
+          {items.filter(item => !item.sorted).map(item => (
+            <div
+              key={item.id}
+              className="bg-white rounded-lg h-12 flex items-center justify-center cursor-grab text-2xl shadow-sm hover:shadow"
+              draggable
+              onDragStart={() => handleDragStart(item)}
             >
-              {item} {itemsFound.includes(item) && <Sparkles className="h-4 w-4 ml-1" />}
-            </Button>
+              {item.emoji}
+            </div>
           ))}
         </div>
       </div>
       
-      {itemsFound.length === groceryItems.length && (
-        <div className="bg-green-100 text-green-800 p-4 rounded-lg text-center">
-          <h3 className="font-bold mb-1">All items found!</h3>
-          <p>Great job! You found all the items on your list.</p>
+      {gameComplete && (
+        <div className="bg-green-100 text-green-800 p-4 rounded-lg text-center mt-4">
+          <h3 className="font-bold mb-1">You completed all levels!</h3>
+          <p>Amazing job! Your final score is {score} points.</p>
         </div>
       )}
     </div>
