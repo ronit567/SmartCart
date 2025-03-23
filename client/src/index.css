@@ -3,12 +3,55 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --font-size-scale: 1;
+  }
+
   * {
     @apply border-border;
   }
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Accessibility: Font scaling */
+  h1, h2, h3, h4, h5, h6, p, span, button, a, label, input, textarea, select, li {
+    font-size: calc(100% * var(--font-size-scale));
+  }
+  
+  /* Accessibility: High contrast mode */
+  .high-contrast-mode {
+    filter: contrast(1.4);
+  }
+  
+  .high-contrast-mode button,
+  .high-contrast-mode a,
+  .high-contrast-mode input,
+  .high-contrast-mode select {
+    border: 2px solid currentColor;
+  }
+  
+  .high-contrast-mode h1,
+  .high-contrast-mode h2,
+  .high-contrast-mode h3,
+  .high-contrast-mode h4,
+  .high-contrast-mode h5,
+  .high-contrast-mode h6 {
+    color: #000000;
+    background-color: transparent;
+  }
+  
+  .high-contrast-mode p,
+  .high-contrast-mode span,
+  .high-contrast-mode label {
+    color: #000000;
+  }
+  
+  .high-contrast-mode .text-gray-500,
+  .high-contrast-mode .text-gray-600,
+  .high-contrast-mode .text-gray-700 {
+    color: #000000 !important;
   }
 }
 
