@@ -56,12 +56,16 @@ export class MemStorage implements IStorage {
   private cartItems: Map<number, CartItem>;
   private orders: Map<number, Order>;
   private orderItems: Map<number, OrderItem>;
+  private rewards: Map<number, Reward>;
+  private pointsTransactions: Map<number, PointsTransaction>;
   
   private currentUserId: number;
   private currentProductId: number;
   private currentCartItemId: number;
   private currentOrderId: number;
   private currentOrderItemId: number;
+  private currentRewardId: number;
+  private currentPointsTransactionId: number;
 
   constructor() {
     this.users = new Map();
@@ -69,15 +73,75 @@ export class MemStorage implements IStorage {
     this.cartItems = new Map();
     this.orders = new Map();
     this.orderItems = new Map();
+    this.rewards = new Map();
+    this.pointsTransactions = new Map();
     
     this.currentUserId = 1;
     this.currentProductId = 1;
     this.currentCartItemId = 1;
     this.currentOrderId = 1;
     this.currentOrderItemId = 1;
+    this.currentRewardId = 1;
+    this.currentPointsTransactionId = 1;
     
     // Initialize with demo products
     this.initializeProducts();
+    
+    // Initialize with demo rewards
+    this.initializeRewards();
+  }
+  
+  private initializeRewards(): void {
+    const demoRewards: InsertReward[] = [
+      {
+        name: "Free shipping",
+        description: "Get free shipping on your next order",
+        pointsCost: 100,
+        imageUrl: "🚚",
+        active: true
+      },
+      {
+        name: "10% Off Coupon",
+        description: "Get 10% off your next purchase",
+        pointsCost: 200,
+        imageUrl: "🏷️",
+        active: true
+      },
+      {
+        name: "Priority Checkout",
+        description: "Skip the line with priority checkout",
+        pointsCost: 150,
+        imageUrl: "⚡",
+        active: true
+      },
+      {
+        name: "Free Item",
+        description: "Get a free item under $5",
+        pointsCost: 500,
+        imageUrl: "🎁",
+        active: true
+      },
+      {
+        name: "VIP Parking",
+        description: "Reserved parking spot for your next visit",
+        pointsCost: 300,
+        imageUrl: "🅿️",
+        active: true
+      }
+    ];
+    
+    for (const reward of demoRewards) {
+      const id = this.currentRewardId++;
+      const newReward: Reward = {
+        id,
+        name: reward.name,
+        description: reward.description,
+        pointsCost: reward.pointsCost,
+        imageUrl: reward.imageUrl ?? null,
+        active: reward.active === undefined ? true : reward.active
+      };
+      this.rewards.set(id, newReward);
+    }
   }
 
   private initializeProducts(): void {
@@ -219,10 +283,26 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id,
       firstName: insertUser.firstName ?? null,
-      lastName: insertUser.lastName ?? null
+      lastName: insertUser.lastName ?? null,
+      points: 0
     };
     this.users.set(id, user);
     return user;
+  }
+  
+  async updateUserPoints(userId: number, points: number): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    const updatedUser = {
+      ...user,
+      points: user.points + points
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
   
   // Product operations
@@ -451,6 +531,18 @@ export class MemStorage implements IStorage {
       });
     }
     
+    // Award points to the user (10 points for every $1 spent, rounded down)
+    const pointsToAward = Math.floor(order.total * 10);
+    if (pointsToAward > 0) {
+      await this.createPointsTransaction({
+        userId: order.userId,
+        pointsAmount: pointsToAward,
+        transactionType: 'earn',
+        description: `Points earned from order #${id}`,
+        orderId: id
+      });
+    }
+    
     return {
       id,
       userId: order.userId,
@@ -484,6 +576,104 @@ export class MemStorage implements IStorage {
     for (const order of userOrders) {
       await this.deleteOrder(order.id);
     }
+    
+    return true;
+  }
+  
+  // Rewards operations
+  async getRewards(): Promise<Reward[]> {
+    return Array.from(this.rewards.values()).filter(reward => reward.active);
+  }
+  
+  async getReward(id: number): Promise<Reward | undefined> {
+    return this.rewards.get(id);
+  }
+  
+  async createReward(reward: InsertReward): Promise<Reward> {
+    const id = this.currentRewardId++;
+    const newReward: Reward = {
+      id,
+      name: reward.name,
+      description: reward.description,
+      pointsCost: reward.pointsCost,
+      imageUrl: reward.imageUrl ?? null,
+      active: reward.active === undefined ? true : reward.active
+    };
+    this.rewards.set(id, newReward);
+    return newReward;
+  }
+  
+  async updateReward(id: number, reward: Partial<InsertReward>): Promise<Reward | undefined> {
+    const existingReward = this.rewards.get(id);
+    if (!existingReward) {
+      return undefined;
+    }
+    
+    const updatedReward = {
+      ...existingReward,
+      ...reward
+    };
+    
+    this.rewards.set(id, updatedReward);
+    return updatedReward;
+  }
+  
+  async deleteReward(id: number): Promise<boolean> {
+    return this.rewards.delete(id);
+  }
+  
+  // Points transactions operations
+  async getPointsTransactions(userId: number): Promise<PointsTransaction[]> {
+    return Array.from(this.pointsTransactions.values())
+      .filter(transaction => transaction.userId === userId)
+      .sort((a, b) => {
+        // Sort by createdAt descending (newest first)
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }
+  
+  async createPointsTransaction(transaction: InsertPointsTransaction): Promise<PointsTransaction> {
+    const id = this.currentPointsTransactionId++;
+    const newTransaction: PointsTransaction = {
+      ...transaction,
+      id,
+      orderId: transaction.orderId ?? null,
+      rewardId: transaction.rewardId ?? null,
+      createdAt: new Date()
+    };
+    
+    this.pointsTransactions.set(id, newTransaction);
+    
+    // Update user points
+    if (transaction.transactionType === 'earn') {
+      await this.updateUserPoints(transaction.userId, transaction.pointsAmount);
+    } else if (transaction.transactionType === 'redeem') {
+      await this.updateUserPoints(transaction.userId, -transaction.pointsAmount);
+    }
+    
+    return newTransaction;
+  }
+  
+  async redeemPoints(userId: number, rewardId: number): Promise<boolean> {
+    const user = await this.getUser(userId);
+    const reward = await this.getReward(rewardId);
+    
+    if (!user || !reward) {
+      return false;
+    }
+    
+    if (user.points < reward.pointsCost) {
+      return false;
+    }
+    
+    // Create a redemption transaction
+    await this.createPointsTransaction({
+      userId,
+      pointsAmount: reward.pointsCost,
+      transactionType: 'redeem',
+      description: `Redeemed for ${reward.name}`,
+      rewardId
+    });
     
     return true;
   }
