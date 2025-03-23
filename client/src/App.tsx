@@ -13,6 +13,11 @@ import OrderHistoryPage from "@/pages/order-history-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { CartProvider } from "@/contexts/cart-context";
+import { AccessibilityProvider } from "@/contexts/accessibility-context";
+import { VoiceControl } from "@/components/VoiceControl";
+import { AccessibilityPanel } from "@/components/AccessibilityPanel";
+import { useAccessibility } from "@/contexts/accessibility-context";
+import { FontSizeScaler } from "@/components/FontSizeScaler";
 
 function Router() {
   return (
@@ -29,13 +34,29 @@ function Router() {
   );
 }
 
+function AccessibilityFeatures() {
+  const { voiceControlEnabled } = useAccessibility();
+  
+  return (
+    <>
+      <AccessibilityPanel />
+      {voiceControlEnabled && <VoiceControl />}
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <Router />
-          <Toaster />
+          <AccessibilityProvider>
+            <FontSizeScaler>
+              <Router />
+              <AccessibilityFeatures />
+              <Toaster />
+            </FontSizeScaler>
+          </AccessibilityProvider>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
