@@ -243,6 +243,7 @@ function MemoryMatchGame() {
   const [flippedIndexes, setFlippedIndexes] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
   
   const emojis = ["🍎", "🍌", "🥕", "🥛", "🍞", "🥚"];
   
@@ -262,47 +263,59 @@ function MemoryMatchGame() {
     setFlippedIndexes([]);
     setMoves(0);
     setGameStarted(true);
+    setIsChecking(false);
   };
   
   const flipCard = (index: number) => {
-    // Don't flip if already matched or flipped
-    if (cards[index].matched || cards[index].flipped || flippedCount === 2) return;
+    // Don't flip if already matched or flipped or we're currently checking a pair
+    if (cards[index].matched || cards[index].flipped || flippedCount === 2 || isChecking) return;
     
     // Create a new card array with the flipped card
     const newCards = [...cards];
     newCards[index].flipped = true;
+    setCards(newCards);
     
     // Track flipped cards
     const newFlippedIndexes = [...flippedIndexes, index];
+    setFlippedIndexes(newFlippedIndexes);
+    setFlippedCount(newFlippedIndexes.length);
     
     // If we flipped 2 cards
     if (newFlippedIndexes.length === 2) {
-      setMoves(moves + 1);
+      setIsChecking(true);
+      setMoves(prevMoves => prevMoves + 1);
       
       // Check if the cards match
-      const firstCard = newCards[newFlippedIndexes[0]];
-      const secondCard = newCards[newFlippedIndexes[1]];
+      const firstCardIndex = newFlippedIndexes[0];
+      const secondCardIndex = newFlippedIndexes[1];
+      const firstCard = newCards[firstCardIndex];
+      const secondCard = newCards[secondCardIndex];
       
       if (firstCard.emoji === secondCard.emoji) {
         // Mark as matched
-        firstCard.matched = true;
-        secondCard.matched = true;
+        const updatedCards = [...newCards];
+        updatedCards[firstCardIndex].matched = true;
+        updatedCards[secondCardIndex].matched = true;
+        
+        setTimeout(() => {
+          setCards(updatedCards);
+          setFlippedCount(0);
+          setFlippedIndexes([]);
+          setIsChecking(false);
+        }, 500);
+      } else {
+        // After a delay, flip unmatched cards back
+        setTimeout(() => {
+          const updatedCards = [...newCards];
+          updatedCards[firstCardIndex].flipped = false;
+          updatedCards[secondCardIndex].flipped = false;
+          setCards(updatedCards);
+          setFlippedCount(0);
+          setFlippedIndexes([]);
+          setIsChecking(false);
+        }, 1000);
       }
-      
-      // After a delay, flip unmatched cards back
-      setTimeout(() => {
-        newCards.forEach(card => {
-          if (!card.matched) card.flipped = false;
-        });
-        setCards([...newCards]);
-        setFlippedCount(0);
-        setFlippedIndexes([]);
-      }, 1000);
     }
-    
-    setCards(newCards);
-    setFlippedCount(newFlippedIndexes.length);
-    setFlippedIndexes(newFlippedIndexes);
   };
   
   if (!gameStarted) {
@@ -320,7 +333,7 @@ function MemoryMatchGame() {
     );
   }
   
-  const allMatched = cards.every(card => card.matched);
+  const allMatched = cards.length > 0 && cards.every(card => card.matched);
   
   return (
     <div>
@@ -335,11 +348,11 @@ function MemoryMatchGame() {
         {cards.map((card, index) => (
           <div
             key={card.id}
-            className={`aspect-square flex items-center justify-center text-2xl rounded-lg cursor-pointer ${
+            className={`aspect-square flex items-center justify-center text-2xl rounded-lg cursor-pointer transition-all duration-300 ${
               card.flipped || card.matched 
-                ? "bg-indigo-100 text-indigo-800" 
-                : "bg-indigo-600"
-            }`}
+                ? "bg-indigo-100 text-indigo-800 shadow-md transform hover:scale-105" 
+                : "bg-indigo-600 hover:bg-indigo-700"
+            } ${isChecking ? 'pointer-events-none' : ''}`}
             onClick={() => flipCard(index)}
           >
             {(card.flipped || card.matched) ? card.emoji : ""}
@@ -348,9 +361,16 @@ function MemoryMatchGame() {
       </div>
       
       {allMatched && (
-        <div className="bg-green-100 text-green-800 p-4 rounded-lg text-center">
-          <h3 className="font-bold mb-1">You won!</h3>
+        <div className="bg-green-100 text-green-800 p-4 rounded-lg text-center mt-2 animate-pulse">
+          <h3 className="font-bold mb-1">You won! 🎉</h3>
           <p>All pairs matched in {moves} moves.</p>
+          <Button 
+            onClick={startGame} 
+            className="mt-2 bg-green-600 hover:bg-green-700 text-white"
+            size="sm"
+          >
+            Play Again
+          </Button>
         </div>
       )}
     </div>
