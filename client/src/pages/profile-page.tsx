@@ -11,7 +11,7 @@ export default function ProfilePage() {
   const [, navigate] = useLocation();
 
   if (!user) {
-    return null; // Protected route should handle this
+    return <div className="min-h-screen bg-background flex items-center justify-center">Loading profile...</div>;
   }
 
   return (

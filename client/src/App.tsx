@@ -60,11 +60,6 @@ function App() {
           <AccessibilityProvider>
             <FontSizeScaler>
               <Router />
-              <div className="pb-16 md:pb-0">
-                <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border md:hidden">
-                  <Navigation />
-                </div>
-              </div>
               <AccessibilityFeatures />
               <Toaster />
             </FontSizeScaler>

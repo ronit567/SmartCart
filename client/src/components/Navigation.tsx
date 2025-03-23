@@ -88,13 +88,26 @@ export function FloatingNavigation() {
 
 export function HeaderNav() {
   const { user, logoutMutation } = useAuth();
+  const [, navigate] = useLocation();
   
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-indigo-900">
+      <button 
+        onClick={() => navigate("/rewards")}
+        className="flex items-center text-sm text-indigo-900 hover:text-indigo-700 px-2 py-1 rounded-md hover:bg-indigo-100"
+      >
         <Star className="h-4 w-4 inline-block mr-1 text-yellow-500" /> 
         {user?.points || 0} points
-      </span>
+      </button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => navigate("/profile")}
+        className="text-indigo-900 border-indigo-300 hover:bg-indigo-100"
+      >
+        <UserCircle className="h-4 w-4 mr-1" />
+        Profile
+      </Button>
       <Button 
         variant="ghost" 
         size="sm" 
@@ -103,6 +116,87 @@ export function HeaderNav() {
       >
         Logout
       </Button>
+    </div>
+  );
+}
+
+interface MobileNavProps {
+  onClose?: () => void;
+}
+
+export function MobileNav({ onClose = () => {} }: MobileNavProps) {
+  const [location, navigate] = useLocation();
+  const { user, logoutMutation } = useAuth();
+
+  const menuItems = [
+    { path: "/", label: "Home", icon: Home },
+    { path: "/scan", label: "Scan Items", icon: Camera },
+    { path: "/cart", label: "Shopping Cart", icon: ShoppingCart },
+    { path: "/rewards", label: "Rewards", icon: Star },
+    { path: "/order-history", label: "Order History", icon: History },
+    { path: "/ai-assistant", label: "AI Assistant", icon: MessageCircle },
+    { path: "/profile", label: "My Profile", icon: UserCircle },
+  ];
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    onClose();
+  };
+
+  return (
+    <div>
+      <div className="mb-6 p-4 bg-indigo-100 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <UserCircle className="h-5 w-5 text-indigo-700" />
+          <span className="font-medium">{user?.username || 'User'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Star className="h-4 w-4 text-yellow-500" />
+          <span className="text-sm">{user?.points || 0} points</span>
+        </div>
+      </div>
+
+      <nav>
+        <ul className="space-y-1">
+          {menuItems.map((item) => {
+            const IconComponent = item.icon;
+            const isActive = location === item.path;
+            
+            return (
+              <li key={item.path}>
+                <button
+                  onClick={() => handleNavigation(item.path)}
+                  className={cn(
+                    "flex items-center w-full p-3 text-left text-sm rounded-md",
+                    isActive 
+                      ? "bg-indigo-100 text-indigo-900 font-medium" 
+                      : "text-gray-700 hover:bg-gray-100"
+                  )}
+                >
+                  <IconComponent className="h-5 w-5 mr-3" />
+                  {item.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <div className="mt-8 pt-4 border-t">
+        <Button
+          variant="ghost"
+          className="flex items-center w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+          onClick={() => {
+            logoutMutation.mutate();
+            onClose();
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Logout
+        </Button>
+      </div>
     </div>
   );
 }
