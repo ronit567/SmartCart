@@ -16,8 +16,15 @@
   }
 
   /* Accessibility: Font scaling */
-  h1, h2, h3, h4, h5, h6, p, span, button, a, label, input, textarea, select, li {
-    font-size: calc(100% * var(--font-size-scale));
+  h1, h2, h3, h4, h5, h6, p, span, button, a, label, input, textarea, select, li, 
+  div, td, th, caption, figcaption, blockquote, cite, code, pre, 
+  strong, em, small, time, abbr, address, b, i {
+    font-size: calc(100% * var(--font-size-scale)) !important;
+  }
+  
+  /* Scale SVG icons too */
+  svg {
+    transform: scale(var(--font-size-scale));
   }
   
   /* Accessibility: High contrast mode */
