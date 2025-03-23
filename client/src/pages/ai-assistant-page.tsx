@@ -177,7 +177,7 @@ export default function AIAssistantPage() {
             <ChevronLeft className="h-5 w-5" />
             {!isMobile && <span className="ml-1">Back</span>}
           </Button>
-          <h1 className="text-xl font-semibold text-indigo-900">SmartCart Assistant</h1>
+          <h1 className="text-sm font-medium text-indigo-900">SmartCart Assistant</h1>
         </div>
       </Header>
 
