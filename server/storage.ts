@@ -147,6 +147,13 @@ export class MemStorage implements IStorage {
   private initializeProducts(): void {
     // Load products from Loblaws CSV data (over 12,000 products)
     const loblawsProducts: InsertProduct[] = [
+      // Add dip products for the complementary items feature
+      { name: 'Classic Salsa Dip', price: 3.99, barcode: '10001', imageUrl: '' },
+      { name: 'Creamy Ranch Dip', price: 2.79, barcode: '10002', imageUrl: '' },
+      { name: 'Homestyle Guacamole', price: 4.49, barcode: '10003', imageUrl: '' },
+      { name: 'Spicy Queso Dip', price: 3.29, barcode: '10004', imageUrl: '' },
+      { name: 'Roasted Garlic Hummus', price: 4.29, barcode: '10005', imageUrl: '' },
+      
       { name: 'English Cucumber', price: 1.99, barcode: '20001', imageUrl: '' },
       { name: 'Green Onion', price: 1.69, barcode: '20002', imageUrl: '' },
       { name: "Farmer's Market Yellow Onions", price: 1.99, barcode: '20003', imageUrl: '' },
