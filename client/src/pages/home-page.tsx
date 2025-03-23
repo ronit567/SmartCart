@@ -82,33 +82,8 @@ export default function HomePage() {
       <Header>
         <div className="flex items-center space-x-6">
           <a
-            href="#"
-            className="text-indigo-900 text-sm font-medium hidden sm:inline"
-          >
-            Home
-          </a>
-          <a
-            href="#"
-            className="text-indigo-900 text-sm font-medium hidden sm:inline"
-          >
-            AI
-          </a>
-          <a
-            href="#"
-            className="text-indigo-900 text-sm font-medium hidden sm:inline"
-          >
-            About Us
-          </a>
-          <a
-            href="#"
-            className="text-indigo-900 text-sm font-medium hidden sm:inline"
-          >
-            Mission
-          </a>
-          <a
-            href="#"
             onClick={handleHelpClick}
-            className="text-indigo-900 text-sm font-medium hidden sm:inline cursor-pointer"
+            className="text-indigo-900 text-sm font-medium cursor-pointer"
           >
             Help
           </a>
@@ -285,10 +260,16 @@ export default function HomePage() {
                     <Smartphone className="text-indigo-500 h-3 w-3" />
                     <span className="text-[10px] ml-1 text-indigo-500">SmartCart</span>
                   </div>
-                  <div className="flex items-center">
+                  <div 
+                    className="flex items-center cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent parent onClick from triggering
+                      handleHelpClick();
+                    }}
+                  >
                     <Mic className="text-indigo-500 h-3 w-3 mr-1 animate-pulse" />
-                    <div className="text-[10px] text-right text-indigo-500 hidden xs:inline">
-                      Settings
+                    <div className="text-[10px] text-right text-indigo-500">
+                      Help
                     </div>
                   </div>
                 </div>
