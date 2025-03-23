@@ -8,6 +8,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   firstName: text("first_name"),
   lastName: text("last_name"),
+  points: integer("points").notNull().default(0),
 });
 
 export const products = pgTable("products", {
@@ -40,6 +41,26 @@ export const orderItems = pgTable("order_items", {
   productId: integer("product_id").notNull(),
   quantity: integer("quantity").notNull(),
   price: doublePrecision("price").notNull(),
+});
+
+export const rewards = pgTable("rewards", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  pointsCost: integer("points_cost").notNull(),
+  imageUrl: text("image_url"),
+  active: boolean("active").notNull().default(true),
+});
+
+export const pointsTransactions = pgTable("points_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  pointsAmount: integer("points_amount").notNull(),
+  transactionType: text("transaction_type").notNull(), // 'earn' or 'redeem'
+  description: text("description").notNull(),
+  orderId: integer("order_id"),
+  rewardId: integer("reward_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -76,6 +97,23 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).pick({
   price: true,
 });
 
+export const insertRewardSchema = createInsertSchema(rewards).pick({
+  name: true,
+  description: true,
+  pointsCost: true,
+  imageUrl: true,
+  active: true,
+});
+
+export const insertPointsTransactionSchema = createInsertSchema(pointsTransactions).pick({
+  userId: true,
+  pointsAmount: true,
+  transactionType: true,
+  description: true,
+  orderId: true,
+  rewardId: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -90,6 +128,12 @@ export type Order = typeof orders.$inferSelect;
 
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
+
+export type InsertReward = z.infer<typeof insertRewardSchema>;
+export type Reward = typeof rewards.$inferSelect;
+
+export type InsertPointsTransaction = z.infer<typeof insertPointsTransactionSchema>;
+export type PointsTransaction = typeof pointsTransactions.$inferSelect;
 
 // Front-end types
 export type CartItemWithProduct = {

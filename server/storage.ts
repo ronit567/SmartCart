@@ -3,7 +3,9 @@ import {
   products, type Product, type InsertProduct,
   cartItems, type CartItem, type InsertCartItem, type CartItemWithProduct,
   orders, type Order, type InsertOrder, type OrderWithItems,
-  orderItems, type OrderItem, type InsertOrderItem
+  orderItems, type OrderItem, type InsertOrderItem,
+  rewards, type Reward, type InsertReward,
+  pointsTransactions, type PointsTransaction, type InsertPointsTransaction
 } from "@shared/schema";
 import session from "express-session";
 
@@ -12,6 +14,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserPoints(userId: number, points: number): Promise<User>;
   
   // Product operations
   getProduct(id: number): Promise<Product | undefined>;
@@ -33,6 +36,18 @@ export interface IStorage {
   createOrder(order: InsertOrder, items: CartItemWithProduct[]): Promise<OrderWithItems>;
   deleteOrder(id: number): Promise<boolean>;
   clearOrderHistory(userId: number): Promise<boolean>;
+  
+  // Rewards operations
+  getRewards(): Promise<Reward[]>;
+  getReward(id: number): Promise<Reward | undefined>;
+  createReward(reward: InsertReward): Promise<Reward>;
+  updateReward(id: number, reward: Partial<InsertReward>): Promise<Reward | undefined>;
+  deleteReward(id: number): Promise<boolean>;
+  
+  // Points transactions operations
+  getPointsTransactions(userId: number): Promise<PointsTransaction[]>;
+  createPointsTransaction(transaction: InsertPointsTransaction): Promise<PointsTransaction>;
+  redeemPoints(userId: number, rewardId: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
