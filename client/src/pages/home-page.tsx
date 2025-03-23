@@ -171,20 +171,24 @@ export default function HomePage() {
             <h2 className="text-lg sm:text-xl md:text-2xl font-medium mb-3 md:mb-4 text-gray-800">
               Shop Smarter, Checkout Faster!
             </h2>
+            <p className="text-gray-700 mb-4 max-w-md mx-auto md:mx-0 text-sm sm:text-base">
+              Say goodbye to long checkout lines! SmartCart transforms your grocery 
+              shopping experience with powerful AI technology that recognizes products instantly.
+            </p>
             <p className="text-gray-700 mb-6 md:mb-8 max-w-md mx-auto md:mx-0 text-sm sm:text-base">
-              SmartCart revolutionizes grocery shopping with AI-powered, 
-              accessible, and seamless checkout solutions — making every 
-              trip faster, easier, and smarter for all.
+              <span className="font-medium text-indigo-700">How it works:</span> Simply scan items with your 
+              phone camera, review your cart, and walk out! Your payment is processed automatically, 
+              saving you time and hassle on every shopping trip.
             </p>
           </div>
           
           <div className="flex flex-col items-center md:items-start space-y-3">
             <Button 
               onClick={handleStartScanning} 
-              className="bg-indigo-900 hover:bg-indigo-800 text-white w-full sm:w-56 h-12 text-lg rounded-md mt-4 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105"
+              className="bg-gradient-to-r from-indigo-600 to-indigo-900 hover:from-indigo-700 hover:to-indigo-800 text-white w-full sm:w-64 h-14 text-xl font-semibold rounded-lg mt-4 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 border-2 border-indigo-400/30"
             >
-              Start Scanning
-              <ArrowRight className="ml-2 h-5 w-5" />
+              Start Scanning Now
+              <ArrowRight className="ml-2 h-6 w-6" />
             </Button>
             
             <div className="w-full sm:w-56">
@@ -192,9 +196,20 @@ export default function HomePage() {
             </div>
           </div>
           
-          <p className="text-gray-600 mt-auto text-center md:text-left text-xs pt-8 hidden md:block">
-            Add conveyor belt of fruits and vegetables
-          </p>
+          <div className="flex items-center mt-auto pt-8 hidden md:flex text-xs text-gray-600 space-x-2">
+            <div className="flex space-x-1">
+              <span className="text-indigo-600">✓</span>
+              <span>Fast & Accurate Scanning</span>
+            </div>
+            <div className="flex space-x-1">
+              <span className="text-indigo-600">✓</span>
+              <span>Secure Digital Payments</span>
+            </div>
+            <div className="flex space-x-1">
+              <span className="text-indigo-600">✓</span>
+              <span>Advanced Accessibility Features</span>
+            </div>
+          </div>
         </div>
 
         {/* Right Image - Phone Mockup */}
@@ -335,6 +350,19 @@ export default function HomePage() {
                       </div>
                       <div className="text-[8px] mt-0.5">Milk</div>
                     </div>
+                  </div>
+                </div>
+                
+                {/* Benefits list */}
+                <div className="px-3 mt-1 mb-2">
+                  <div className="text-[9px] bg-indigo-50 rounded-md p-1.5 shadow-sm">
+                    <div className="text-indigo-700 font-medium mb-1">SmartCart Benefits:</div>
+                    <ul className="text-gray-700 list-disc pl-2.5 space-y-0.5">
+                      <li>Skip checkout lines completely</li>
+                      <li>Earn rewards with every purchase</li>
+                      <li>Voice commands for easy shopping</li>
+                      <li>Real-time product information</li>
+                    </ul>
                   </div>
                 </div>
                 
