@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { ShoppingBag, ShoppingCart, Bot, Trash2, Camera, CameraOff } from "lucide-react";
+import { ShoppingBag, ShoppingCart, Trash2, Camera, CameraOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CameraComponent, CameraComponentRef } from "@/components/Camera";
@@ -8,7 +8,6 @@ import { useCart } from "@/contexts/cart-context";
 import { CartItem } from "@/components/CartItem";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { SmartCartAI } from "@/components/SmartCartAI";
 import { Header } from "@/components/Header";
 
 export default function ScanPage() {
@@ -54,41 +53,49 @@ export default function ScanPage() {
     <div className="h-full flex flex-col bg-indigo-100">
       {/* Header */}
       <Header>
-        
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-indigo-900"
-            onClick={toggleCamera}
+        <div className="flex items-center justify-between w-full">
+          <a
+            onClick={() => navigate("/ai-assistant")}
+            className="text-indigo-900 text-sm font-medium cursor-pointer mr-4"
           >
-            {isCameraOn ? (
-              <>
-                <CameraOff className="h-4 w-4 mr-1" />
-                <span className="hidden sm:inline">Turn Off Camera</span>
-              </>
-            ) : (
-              <>
-                <Camera className="h-4 w-4 mr-1" />
-                <span className="hidden sm:inline">Turn On Camera</span>
-              </>
-            )}
-          </Button>
+            Help
+          </a>
           
-          {isMobile && (
+          <div className="flex items-center gap-2">
             <Button 
-              variant="ghost" 
-              className="text-indigo-900 relative"
-              onClick={() => navigate("/cart")}
+              variant="outline" 
+              size="sm"
+              className="text-indigo-900"
+              onClick={toggleCamera}
             >
-              <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
-                <Badge variant="destructive" className="absolute -top-2 -right-2 min-w-5 h-5 flex items-center justify-center">
-                  {totalItems}
-                </Badge>
+              {isCameraOn ? (
+                <>
+                  <CameraOff className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Turn Off Camera</span>
+                </>
+              ) : (
+                <>
+                  <Camera className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Turn On Camera</span>
+                </>
               )}
             </Button>
-          )}
+            
+            {isMobile && (
+              <Button 
+                variant="ghost" 
+                className="text-indigo-900 relative"
+                onClick={() => navigate("/cart")}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge variant="destructive" className="absolute -top-2 -right-2 min-w-5 h-5 flex items-center justify-center">
+                    {totalItems}
+                  </Badge>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       </Header>
       
@@ -168,12 +175,7 @@ export default function ScanPage() {
             </div>
           </div>
           
-          {/* AI Assistant */}
-          {isDesktop && (
-            <div className="border-t border-gray-200 h-80">
-              <SmartCartAI />
-            </div>
-          )}
+
         </div>
       </div>
     </div>
