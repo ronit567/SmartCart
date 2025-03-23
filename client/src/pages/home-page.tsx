@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
   ShoppingCart,
@@ -16,6 +16,7 @@ import { useCart } from "@/contexts/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
 import { ChildrenGames } from "@/components/ChildrenGames";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,11 +32,21 @@ export default function HomePage() {
   const { toast } = useToast();
   const { cartItems, totalItems, subtotal } = useCart();
   const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Preload the placeholder image
+  useEffect(() => {
+    const img = new Image();
+    img.src = "https://placehold.co/300x200/yellow/white?text=Bananas";
+    img.onload = () => setImageLoaded(true);
+  }, []);
 
   const handleProfileClick = () => {
     toast({
       title: "Profile",
       description: `Logged in as ${user?.username}`,
+      duration: 1500,
     });
   };
 
@@ -45,6 +56,15 @@ export default function HomePage() {
 
   const handleHistoryClick = () => {
     navigate("/order-history");
+  };
+
+  const handleStartScanning = () => {
+    navigate("/scan");
+    toast({
+      title: "Camera Activated",
+      description: "Scan your items by pointing the camera at them",
+      duration: 1500,
+    });
   };
 
   return (
@@ -168,7 +188,7 @@ export default function HomePage() {
           
           <div className="flex flex-col items-center md:items-start space-y-3">
             <Button 
-              onClick={() => navigate("/scan")} 
+              onClick={handleStartScanning} 
               className="bg-indigo-900 hover:bg-indigo-800 text-white w-full sm:w-56 h-12 text-lg rounded-md mt-4 shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
               Start Scanning
@@ -218,35 +238,52 @@ export default function HomePage() {
             </svg>
           </div>
 
-          {/* Phone mockup - Responsive sizing */}
-          <div className="relative z-10 my-8 transform scale-75 sm:scale-90 md:scale-100">
+          {/* Phone mockup - Responsive sizing with enhanced user experience */}
+          <div 
+            className="relative z-10 my-8 transform scale-75 sm:scale-90 md:scale-100 cursor-pointer"
+            onClick={handleStartScanning}
+          >
             <div
-              className="bg-black rounded-[40px] shadow-2xl overflow-hidden border-[14px] border-black transition-all duration-500 hover:scale-105"
+              className="bg-black rounded-[40px] shadow-2xl overflow-hidden border-[14px] border-black transition-all duration-500 hover:scale-105 relative"
               style={{ maxWidth: "280px" }}
             >
+              {/* Status bar */}
+              <div className="absolute top-0 left-0 right-0 h-6 bg-black flex justify-between items-center px-6 z-20">
+                <div className="text-white text-[8px]">2:18 PM</div>
+                <div className="flex items-center space-x-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
+                  <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
+                  <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
+                </div>
+              </div>
+              
               {/* Phone notch */}
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-10"></div>
+              
               {/* Phone screen */}
               <div className="bg-indigo-100 pt-8 pb-4 relative z-0">
                 {/* App UI */}
                 <div className="flex justify-between items-center px-4 pb-3">
-                  <Smartphone className="text-indigo-500 h-4 w-4" />
                   <div className="flex items-center">
-                    <Mic className="text-indigo-500 h-4 w-4 mr-2 animate-pulse" />
-                    <div className="text-xs text-right text-indigo-500">
+                    <Smartphone className="text-indigo-500 h-4 w-4" />
+                    <span className="text-xs ml-1 text-indigo-500">SmartCart</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Mic className="text-indigo-500 h-4 w-4 mr-1 animate-pulse" />
+                    <div className="text-xs text-right text-indigo-500 hidden sm:inline">
                       Settings
                     </div>
                   </div>
                 </div>
 
                 {/* Cart button - Enhanced styling */}
-                <div className="mx-auto my-2 px-6 py-2 rounded-full bg-indigo-300 hover:bg-indigo-400 cursor-pointer transition-colors duration-300 w-[80%] text-center text-sm font-medium text-indigo-800 flex items-center justify-center space-x-2">
-                  <ShoppingCart className="h-4 w-4" />
-                  <span>View Cart</span>
+                <div className="mx-auto my-2 px-4 py-1.5 rounded-full bg-indigo-300 hover:bg-indigo-400 cursor-pointer transition-colors duration-300 w-[80%] text-center text-xs sm:text-sm font-medium text-indigo-800 flex items-center justify-center space-x-1">
+                  <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span>View Cart ({totalItems || 0})</span>
                 </div>
 
                 {/* Detected item - Enhanced visuals */}
-                <div className="mx-4 my-3 p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="mx-4 my-3 p-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
                   <div className="flex justify-between items-center">
                     <div className="text-xs font-medium">
                       Banana Bundle - Large
@@ -255,23 +292,39 @@ export default function HomePage() {
                       ✓
                     </div>
                   </div>
-                  <div className="mt-1">
+                  <div className="mt-1 relative overflow-hidden rounded-md">
                     <img
                       src="bananas.jpg"
                       alt="Bananas"
-                      className="w-full h-32 object-cover rounded-md"
+                      className="w-full h-28 object-cover rounded-md transition-transform duration-700 hover:scale-110"
                       onError={(e) => {
                         e.currentTarget.src =
                           "https://placehold.co/300x200/yellow/white?text=Bananas";
                       }}
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                   </div>
-                  <div className="text-xs text-center text-gray-500 mt-1">
-                    scanning...
+                  <div className="flex justify-between items-center mt-1.5">
+                    <div className="text-xs text-indigo-500 font-medium">$2.99</div>
+                    <div className="text-xs text-gray-500 flex items-center">
+                      <span className="animate-pulse">scanning</span>
+                      <span className="animate-[pulse_1.5s_ease-in-out_infinite_0.2s]">.</span>
+                      <span className="animate-[pulse_1.5s_ease-in-out_infinite_0.4s]">.</span>
+                      <span className="animate-[pulse_1.5s_ease-in-out_infinite_0.6s]">.</span>
+                    </div>
                   </div>
+                </div>
+                
+                {/* Touch to scan hint */}
+                <div className="text-xs text-center text-indigo-600 mt-1 animate-pulse font-medium">
+                  Tap to try SmartCart!
                 </div>
               </div>
             </div>
+            
+            {/* Phone buttons */}
+            <div className="absolute right-0 top-1/4 w-1 h-8 bg-gray-800 rounded-l-lg"></div>
+            <div className="absolute left-0 top-1/4 w-1 h-10 bg-gray-800 rounded-r-lg"></div>
           </div>
         </div>
       </div>
