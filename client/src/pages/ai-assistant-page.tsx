@@ -246,9 +246,9 @@ export default function AIAssistantPage() {
                   type="button" 
                   size="icon"
                   variant="outline"
-                  className="rounded-full h-10 w-10 border-indigo-200"
+                  className="rounded-full h-10 w-10 border-purple-300 bg-purple-50"
                 >
-                  <Mic className="h-5 w-5 text-indigo-700" />
+                  <Mic className="h-5 w-5 text-purple-800" />
                 </Button>
               )}
               <Button 
