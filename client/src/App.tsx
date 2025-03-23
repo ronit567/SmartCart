@@ -11,6 +11,7 @@ import CheckoutPage from "@/pages/checkout-page";
 import ConfirmationPage from "@/pages/confirmation-page";
 import OrderHistoryPage from "@/pages/order-history-page";
 import AIAssistantPage from "@/pages/ai-assistant-page";
+import RewardsPage from "@/pages/rewards-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { CartProvider } from "@/contexts/cart-context";
@@ -19,6 +20,7 @@ import { VoiceControl } from "@/components/VoiceControl";
 import { AccessibilityPanel } from "@/components/AccessibilityPanel";
 import { useAccessibility } from "@/contexts/accessibility-context";
 import { FontSizeScaler } from "@/components/FontSizeScaler";
+import { Navigation } from "@/components/Navigation";
 
 function Router() {
   return (
@@ -31,6 +33,7 @@ function Router() {
       <ProtectedRoute path="/confirmation" component={ConfirmationPage} />
       <ProtectedRoute path="/order-history" component={OrderHistoryPage} />
       <ProtectedRoute path="/ai-assistant" component={AIAssistantPage} />
+      <ProtectedRoute path="/rewards" component={RewardsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -55,6 +58,11 @@ function App() {
           <AccessibilityProvider>
             <FontSizeScaler>
               <Router />
+              <div className="pb-16 md:pb-0">
+                <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border md:hidden">
+                  <Navigation />
+                </div>
+              </div>
               <AccessibilityFeatures />
               <Toaster />
             </FontSizeScaler>

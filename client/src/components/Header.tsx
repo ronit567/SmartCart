@@ -1,5 +1,6 @@
 import { ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
+import { HeaderNav } from "./Navigation";
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -24,7 +25,10 @@ export function Header({ children }: HeaderProps) {
         <ShoppingCart className="text-indigo-900 mr-2 h-5 w-5" />
         <h1 className="text-xl font-bold text-indigo-900">SMARTCART</h1>
       </div>
-      {children}
+      <div className="flex items-center">
+        {children}
+        {!children && <HeaderNav />}
+      </div>
     </header>
   );
 }

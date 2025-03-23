@@ -377,6 +377,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to clear order history" });
     }
   });
+
+  // Rewards routes
+  app.get("/api/rewards", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const rewards = await storage.getRewards();
+      res.json(rewards);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch rewards" });
+    }
+  });
+
+  app.get("/api/rewards/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid reward ID" });
+      }
+      
+      const reward = await storage.getReward(id);
+      if (!reward) {
+        return res.status(404).json({ message: "Reward not found" });
+      }
+      
+      res.json(reward);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reward" });
+    }
+  });
+
+  // Points transaction routes
+  app.get("/api/points-transactions", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const transactions = await storage.getPointsTransactions(req.user!.id);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch points transactions" });
+    }
+  });
+
+  // Redeem points for a reward
+  app.post("/api/redeem-points/:rewardId", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    try {
+      const rewardId = parseInt(req.params.rewardId);
+      if (isNaN(rewardId)) {
+        return res.status(400).json({ message: "Invalid reward ID" });
+      }
+      
+      const reward = await storage.getReward(rewardId);
+      if (!reward) {
+        return res.status(404).json({ message: "Reward not found" });
+      }
+      
+      const user = req.user!;
+      if (user.points < reward.pointsCost) {
+        return res.status(400).json({ message: "Not enough points" });
+      }
+      
+      const success = await storage.redeemPoints(user.id, rewardId);
+      if (!success) {
+        return res.status(500).json({ message: "Failed to redeem points" });
+      }
+      
+      // Get updated user data
+      const updatedUser = await storage.getUser(user.id);
+      
+      res.status(200).json({ 
+        message: "Points redeemed successfully",
+        user: updatedUser 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to redeem points" });
+    }
+  });
   
   // Create server instance
   const httpServer = createServer(app);
