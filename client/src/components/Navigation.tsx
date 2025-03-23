@@ -87,11 +87,11 @@ export function FloatingNavigation() {
 }
 
 export function HeaderNav() {
-  const { user, logoutMutation } = useAuth();
+  const { user } = useAuth();
   const [, navigate] = useLocation();
   
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center">
       <button 
         onClick={() => navigate("/rewards")}
         className="flex items-center text-sm text-indigo-900 hover:text-indigo-700 px-2 py-1 rounded-md hover:bg-indigo-100"
@@ -99,23 +99,6 @@ export function HeaderNav() {
         <Star className="h-4 w-4 inline-block mr-1 text-yellow-500" /> 
         {user?.points || 0} points
       </button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigate("/profile")}
-        className="text-indigo-900 border-indigo-300 hover:bg-indigo-100"
-      >
-        <UserCircle className="h-4 w-4 mr-1" />
-        Profile
-      </Button>
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={() => logoutMutation.mutate()} 
-        className="text-indigo-900 hover:text-indigo-700 hover:bg-indigo-100"
-      >
-        Logout
-      </Button>
     </div>
   );
 }
