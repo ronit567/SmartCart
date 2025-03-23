@@ -6,6 +6,7 @@ import { ManualEntryModal } from "@/components/ManualEntryModal";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/contexts/cart-context";
 import { useToast } from "@/hooks/use-toast";
+import { Header } from "@/components/Header";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,12 +40,7 @@ export default function HomePage() {
   
   return (
     <div className="h-full flex flex-col">
-      {/* Header - Exactly as shown in screenshot */}
-      <header className="bg-indigo-200 py-2 px-4 flex justify-between items-center shadow-sm">
-        <div className="flex items-center">
-          <ShoppingCart className="text-indigo-900 mr-2 h-5 w-5" />
-          <h1 className="text-xl font-bold text-indigo-900">SMARTCART</h1>
-        </div>
+      <Header>
         <div className="flex items-center space-x-6">
           <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">Home</a>
           <a href="#" className="text-indigo-900 text-sm font-medium hidden sm:inline">AI</a>
@@ -108,7 +104,7 @@ export default function HomePage() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </header>
+      </Header>
 
       {/* Hero Section - Matched to screenshot */}
       <div className="flex-grow flex flex-col md:flex-row overflow-hidden">

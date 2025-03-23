@@ -9,6 +9,7 @@ import { CartItem } from "@/components/CartItem";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { SmartCartAI } from "@/components/SmartCartAI";
+import { Header } from "@/components/Header";
 
 export default function ScanPage() {
   const [, navigate] = useLocation();
@@ -52,11 +53,7 @@ export default function ScanPage() {
   return (
     <div className="h-full flex flex-col bg-indigo-100">
       {/* Header */}
-      <header className="bg-indigo-200 text-indigo-900 p-3 flex justify-between items-center shadow-sm">
-        <div className="flex items-center">
-          <ShoppingCart className="text-indigo-900 mr-2 h-5 w-5" />
-          <h1 className="text-xl font-bold">SMARTCART</h1>
-        </div>
+      <Header>
         
         <div className="flex items-center gap-2">
           <Button 
@@ -93,7 +90,7 @@ export default function ScanPage() {
             </Button>
           )}
         </div>
-      </header>
+      </Header>
       
       {/* Main Content - Responsive Layout */}
       <div className={`flex-grow flex ${isDesktop ? 'flex-row' : 'flex-col'} overflow-hidden`}>
