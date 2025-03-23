@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/contexts/cart-context";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
+import { ChildrenGames } from "@/components/ChildrenGames";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -124,11 +125,15 @@ export default function HomePage() {
           
           <Button 
             onClick={() => navigate("/scan")} 
-            className="bg-indigo-900 hover:bg-indigo-800 text-white w-48 h-12 text-lg rounded-md mb-20 mt-4"
+            className="bg-indigo-900 hover:bg-indigo-800 text-white w-48 h-12 text-lg rounded-md mt-4"
           >
             Start Scanning
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
+          
+          <div className="mt-2 mb-16">
+            <ChildrenGames />
+          </div>
           
           <p className="text-gray-600 mt-auto">
             Add conveyor belt of fruits and vegetables
