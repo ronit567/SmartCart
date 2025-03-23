@@ -12,6 +12,7 @@ import ConfirmationPage from "@/pages/confirmation-page";
 import OrderHistoryPage from "@/pages/order-history-page";
 import AIAssistantPage from "@/pages/ai-assistant-page";
 import RewardsPage from "@/pages/rewards-page";
+import ProfilePage from "@/pages/profile-page";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { CartProvider } from "@/contexts/cart-context";
@@ -34,6 +35,7 @@ function Router() {
       <ProtectedRoute path="/order-history" component={OrderHistoryPage} />
       <ProtectedRoute path="/ai-assistant" component={AIAssistantPage} />
       <ProtectedRoute path="/rewards" component={RewardsPage} />
+      <ProtectedRoute path="/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );

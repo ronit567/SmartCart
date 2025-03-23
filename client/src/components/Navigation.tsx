@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { 
   Home, 
   ShoppingCart, 
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function Navigation() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const { user } = useAuth();
 
   const links = [
@@ -36,39 +36,39 @@ export function Navigation() {
             
             return (
               <li key={link.path}>
-                <Link href={link.path}>
-                  <a 
-                    className={cn(
-                      "flex flex-col items-center px-2 py-1 text-xs rounded-md",
-                      isActive ? 
-                        "text-primary font-medium" : 
-                        "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <IconComponent className={cn(
-                      "h-5 w-5 mb-1",
-                      isActive ? "text-primary" : "text-muted-foreground"
-                    )} />
-                    {link.label}
-                  </a>
-                </Link>
+                <button
+                  onClick={() => navigate(link.path)}
+                  className={cn(
+                    "flex flex-col items-center px-2 py-1 text-xs rounded-md w-full",
+                    isActive ? 
+                      "text-primary font-medium" : 
+                      "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <IconComponent className={cn(
+                    "h-5 w-5 mb-1",
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  )} />
+                  {link.label}
+                </button>
               </li>
             );
           })}
           <li className="relative">
-            <Link href="/profile">
-              <a className="flex flex-col items-center px-2 py-1 text-xs text-muted-foreground hover:text-foreground">
-                <div className="relative">
-                  <UserCircle className="h-5 w-5 mb-1" />
-                  {user && user.points > 0 && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full flex items-center justify-center">
-                      <Star className="h-2 w-2 text-primary-foreground" />
-                    </div>
-                  )}
-                </div>
-                Profile
-              </a>
-            </Link>
+            <button 
+              onClick={() => navigate("/profile")}
+              className="flex flex-col items-center px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <div className="relative">
+                <UserCircle className="h-5 w-5 mb-1" />
+                {user && user.points > 0 && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full flex items-center justify-center">
+                    <Star className="h-2 w-2 text-primary-foreground" />
+                  </div>
+                )}
+              </div>
+              Profile
+            </button>
           </li>
         </ul>
       </div>
