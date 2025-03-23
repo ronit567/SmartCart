@@ -127,7 +127,7 @@ export const CameraComponent = forwardRef<CameraComponentRef, CameraComponentPro
               title: "Camera Error",
               description: "Could not access the camera. Please check permissions.",
               variant: "destructive",
-              duration: 500, // 0.5 seconds
+              duration: 1000, // 1 second
             });
           }
         }, 500);
@@ -138,7 +138,7 @@ export const CameraComponent = forwardRef<CameraComponentRef, CameraComponentPro
           title: "Camera Error",
           description: "Could not access the camera. Please check permissions.",
           variant: "destructive",
-          duration: 500, // 0.5 seconds
+          duration: 1000, // 1 second
         });
       }
     };
@@ -204,7 +204,7 @@ export const CameraComponent = forwardRef<CameraComponentRef, CameraComponentPro
           title: 'Identification Error',
           description: 'Could not analyze the image. Please try again.',
           variant: 'destructive',
-          duration: 500, // 0.5 seconds
+          duration: 1000, // 1 second
         });
         setIsScanning(false);
       }
@@ -257,7 +257,7 @@ export const CameraComponent = forwardRef<CameraComponentRef, CameraComponentPro
         title: 'Item Not Added',
         description: 'The item was not added to your cart.',
         variant: 'default',
-        duration: 500, // 0.5 seconds
+        duration: 1000, // 1 second
       });
     };
   
@@ -385,7 +385,7 @@ export const CameraComponent = forwardRef<CameraComponentRef, CameraComponentPro
                 title: 'Added Suggested Item',
                 description: `Added ${bestMatch.name} to your cart based on our best guess.`,
                 variant: 'default',
-                duration: 500, // 0.5 seconds
+                duration: 1000, // 1 second
               });
               
               // Play success sound
@@ -404,7 +404,7 @@ export const CameraComponent = forwardRef<CameraComponentRef, CameraComponentPro
                 title: 'Product Not Found',
                 description: `Could not find "${result.suggestion}" in our database.`,
                 variant: 'destructive',
-                duration: 500, // 0.5 seconds
+                duration: 1000, // 1 second
               });
               
               // Play error sound
@@ -424,7 +424,7 @@ export const CameraComponent = forwardRef<CameraComponentRef, CameraComponentPro
               title: 'Product Not Recognized',
               description: 'Unable to identify this item. Please try again.',
               variant: 'destructive',
-              duration: 500, // 0.5 seconds
+              duration: 1000, // 1 second
             });
             
             // Play error sound
@@ -443,7 +443,7 @@ export const CameraComponent = forwardRef<CameraComponentRef, CameraComponentPro
           title: 'Scan Failed',
           description: 'Could not complete the scan. Please try again.',
           variant: 'destructive',
-          duration: 500, // 0.5 seconds
+          duration: 1000, // 1 second
         });
       } finally {
         setIsScanning(false);
