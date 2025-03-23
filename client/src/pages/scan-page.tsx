@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { ShoppingBag, ShoppingCart, Trash2, Camera, CameraOff } from "lucide-react";
+import { ShoppingBag, ShoppingCart, Trash2, Camera, CameraOff, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CameraComponent, CameraComponentRef } from "@/components/Camera";
@@ -54,12 +54,9 @@ export default function ScanPage() {
       {/* Header */}
       <Header>
         <div className="flex items-center justify-between w-full">
-          <a
-            onClick={() => navigate("/ai-assistant")}
-            className="text-indigo-900 text-sm font-medium cursor-pointer mr-4"
-          >
-            Help
-          </a>
+          <div>
+            {/* Left side - empty for balance */}
+          </div>
           
           <div className="flex items-center gap-2">
             <Button 
@@ -79,6 +76,16 @@ export default function ScanPage() {
                   <span className="hidden sm:inline">Turn On Camera</span>
                 </>
               )}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="text-indigo-900"
+              onClick={() => navigate("/ai-assistant")}
+            >
+              <HelpCircle className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Help</span>
             </Button>
             
             {isMobile && (
