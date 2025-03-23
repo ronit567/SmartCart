@@ -206,13 +206,13 @@ export default function HomePage() {
         </div>
 
         {/* Right Image - Phone Mockup */}
-        <div className="w-full h-[70vh] md:h-auto md:w-1/2 bg-gradient-to-br from-indigo-400 to-indigo-800 relative overflow-hidden flex items-center justify-center">
+        <div className="w-full h-[50vh] md:h-auto md:w-1/2 bg-gradient-to-br from-indigo-400 to-indigo-800 relative overflow-hidden flex items-center justify-center">
           {/* Background blobs/orbs - Responsive positioning */}
-          <div className="absolute bottom-[10%] right-[10%] w-24 sm:w-32 h-24 sm:h-32 rounded-full bg-indigo-300 opacity-40 blur-xl"></div>
-          <div className="absolute top-[20%] left-[10%] w-16 sm:w-24 h-16 sm:h-24 rounded-full bg-indigo-500 opacity-30 blur-xl"></div>
+          <div className="absolute bottom-[10%] right-[10%] w-16 sm:w-24 h-16 sm:h-24 rounded-full bg-indigo-300 opacity-40 blur-xl"></div>
+          <div className="absolute top-[20%] left-[10%] w-12 sm:w-20 h-12 sm:h-20 rounded-full bg-indigo-500 opacity-30 blur-xl"></div>
 
           {/* Wavy pattern (simplified) - Responsive animation */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-10 hidden sm:block">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <path
                 d="M0,50 Q25,30 50,50 T100,50 T150,50"
@@ -240,12 +240,12 @@ export default function HomePage() {
 
           {/* Phone mockup - Responsive sizing with enhanced user experience */}
           <div 
-            className="relative z-10 my-8 transform scale-75 sm:scale-90 md:scale-100 cursor-pointer"
+            className="relative z-10 my-4 transform scale-[0.6] xs:scale-[0.7] sm:scale-[0.8] md:scale-90 lg:scale-100 cursor-pointer"
             onClick={handleStartScanning}
           >
             <div
               className="bg-black rounded-[40px] shadow-2xl overflow-hidden border-[14px] border-black transition-all duration-500 hover:scale-105 relative"
-              style={{ maxWidth: "280px" }}
+              style={{ width: "280px", height: "560px" }}
             >
               {/* Status bar */}
               <div className="absolute top-0 left-0 right-0 h-6 bg-black flex justify-between items-center px-6 z-20">
@@ -261,34 +261,34 @@ export default function HomePage() {
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-10"></div>
               
               {/* Phone screen */}
-              <div className="bg-indigo-100 pt-8 pb-4 relative z-0">
+              <div className="bg-indigo-100 pt-8 pb-2 relative z-0 h-[510px] flex flex-col">
                 {/* App UI */}
-                <div className="flex justify-between items-center px-4 pb-3">
+                <div className="flex justify-between items-center px-3 pb-2">
                   <div className="flex items-center">
-                    <Smartphone className="text-indigo-500 h-4 w-4" />
-                    <span className="text-xs ml-1 text-indigo-500">SmartCart</span>
+                    <Smartphone className="text-indigo-500 h-3 w-3" />
+                    <span className="text-[10px] ml-1 text-indigo-500">SmartCart</span>
                   </div>
                   <div className="flex items-center">
-                    <Mic className="text-indigo-500 h-4 w-4 mr-1 animate-pulse" />
-                    <div className="text-xs text-right text-indigo-500 hidden sm:inline">
+                    <Mic className="text-indigo-500 h-3 w-3 mr-1 animate-pulse" />
+                    <div className="text-[10px] text-right text-indigo-500 hidden xs:inline">
                       Settings
                     </div>
                   </div>
                 </div>
 
                 {/* Cart button - Enhanced styling */}
-                <div className="mx-auto my-2 px-4 py-1.5 rounded-full bg-indigo-300 hover:bg-indigo-400 cursor-pointer transition-colors duration-300 w-[80%] text-center text-xs sm:text-sm font-medium text-indigo-800 flex items-center justify-center space-x-1">
-                  <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+                <div className="mx-auto my-1 px-3 py-1 rounded-full bg-indigo-300 hover:bg-indigo-400 cursor-pointer transition-colors duration-300 w-[75%] text-center text-[10px] font-medium text-indigo-800 flex items-center justify-center space-x-1">
+                  <ShoppingCart className="h-2.5 w-2.5" />
                   <span>View Cart ({totalItems || 0})</span>
                 </div>
 
                 {/* Detected item - Enhanced visuals */}
-                <div className="mx-4 my-3 p-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                <div className="mx-3 my-1.5 p-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex-grow">
                   <div className="flex justify-between items-center">
-                    <div className="text-xs font-medium">
+                    <div className="text-[10px] font-medium">
                       Banana Bundle - Large
                     </div>
-                    <div className="text-green-500 text-xs bg-green-50 rounded-full w-5 h-5 flex items-center justify-center">
+                    <div className="text-green-500 text-[8px] bg-green-50 rounded-full w-4 h-4 flex items-center justify-center">
                       ✓
                     </div>
                   </div>
@@ -296,7 +296,7 @@ export default function HomePage() {
                     <img
                       src="bananas.jpg"
                       alt="Bananas"
-                      className="w-full h-28 object-cover rounded-md transition-transform duration-700 hover:scale-110"
+                      className="w-full h-48 object-cover rounded-md transition-transform duration-700 hover:scale-110"
                       onError={(e) => {
                         e.currentTarget.src =
                           "https://placehold.co/300x200/yellow/white?text=Bananas";
@@ -305,8 +305,8 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                   </div>
                   <div className="flex justify-between items-center mt-1.5">
-                    <div className="text-xs text-indigo-500 font-medium">$2.99</div>
-                    <div className="text-xs text-gray-500 flex items-center">
+                    <div className="text-[10px] text-indigo-500 font-medium">$2.99</div>
+                    <div className="text-[10px] text-gray-500 flex items-center">
                       <span className="animate-pulse">scanning</span>
                       <span className="animate-[pulse_1.5s_ease-in-out_infinite_0.2s]">.</span>
                       <span className="animate-[pulse_1.5s_ease-in-out_infinite_0.4s]">.</span>
@@ -315,8 +315,33 @@ export default function HomePage() {
                   </div>
                 </div>
                 
+                {/* Other products */}
+                <div className="px-3 py-1">
+                  <div className="text-[10px] font-medium text-indigo-600">Recommended Items:</div>
+                  <div className="flex space-x-2 mt-1 overflow-x-auto pb-1">
+                    <div className="flex-shrink-0 w-14 text-center">
+                      <div className="h-14 w-14 bg-white rounded-md shadow-sm flex items-center justify-center">
+                        <ShoppingCart className="h-6 w-6 text-indigo-300" />
+                      </div>
+                      <div className="text-[8px] mt-0.5">Apple</div>
+                    </div>
+                    <div className="flex-shrink-0 w-14 text-center">
+                      <div className="h-14 w-14 bg-white rounded-md shadow-sm flex items-center justify-center">
+                        <ShoppingCart className="h-6 w-6 text-indigo-300" />
+                      </div>
+                      <div className="text-[8px] mt-0.5">Bread</div>
+                    </div>
+                    <div className="flex-shrink-0 w-14 text-center">
+                      <div className="h-14 w-14 bg-white rounded-md shadow-sm flex items-center justify-center">
+                        <ShoppingCart className="h-6 w-6 text-indigo-300" />
+                      </div>
+                      <div className="text-[8px] mt-0.5">Milk</div>
+                    </div>
+                  </div>
+                </div>
+                
                 {/* Touch to scan hint */}
-                <div className="text-xs text-center text-indigo-600 mt-1 animate-pulse font-medium">
+                <div className="text-[10px] text-center text-indigo-600 mt-auto mb-1 animate-pulse font-medium">
                   Tap to try SmartCart!
                 </div>
               </div>
