@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ShoppingCart, ArrowRight, User as UserIcon, Download, Smartphone, History } from "lucide-react";
+import { ShoppingCart, ArrowRight, User as UserIcon, Download, Smartphone, History, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ManualEntryModal } from "@/components/ManualEntryModal";
 import { useAuth } from "@/hooks/use-auth";
@@ -165,7 +165,10 @@ export default function HomePage() {
                 {/* App UI */}
                 <div className="flex justify-between items-center px-4 pb-3">
                   <Smartphone className="text-indigo-500 h-4 w-4" />
-                  <div className="text-xs text-right text-indigo-500">Settings</div>
+                  <div className="flex items-center">
+                    <Mic className="text-indigo-500 h-4 w-4 mr-2" />
+                    <div className="text-xs text-right text-indigo-500">Settings</div>
+                  </div>
                 </div>
                 
                 {/* Cart button */}
