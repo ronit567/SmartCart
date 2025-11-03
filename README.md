@@ -4,7 +4,7 @@
 
 To get started, clone the repository and navigate into the project directory: `git clone https://github.com/ronit567/SmartCart.git` then `cd SmartCart`.
 
-Install all dependencies by running `npm install`.
+Install dependencies by running `npm install`.
 
 Start the development server using `npm run dev`. After a few seconds, the app should be accessible at [http://localhost:3000](http://localhost:3000) (or the port specified in your configuration).
 
